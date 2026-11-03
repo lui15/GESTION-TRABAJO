@@ -1,0 +1,733 @@
+<!-- =====================================================
+     PANTALLA DE CARGA
+====================================================== -->
+
+<div class="loading-screen" *ngIf="loading">
+  <div class="loading-logo">CS</div>
+  <div class="loader"></div>
+  <p>Preparando tu central de solicitudes...</p>
+</div>
+
+<!-- =====================================================
+     CONFIGURACIÓN PENDIENTE
+====================================================== -->
+
+<div class="setup-screen" *ngIf="!loading && errorMessage.includes('Configura la URL')">
+  <div class="setup-card">
+    <div class="brand-icon">CS</div>
+    <h1>Central de Solicitudes</h1>
+    <p>{{ errorMessage }}</p>
+    <span>Introduce las credenciales de tu proyecto Supabase en app.ts.</span>
+  </div>
+</div>
+
+<!-- =====================================================
+     LOGIN
+====================================================== -->
+
+<div class="login-screen" *ngIf="!loading && !user && !errorMessage.includes('Configura la URL')">
+  <div class="login-decoration decoration-one"></div>
+  <div class="login-decoration decoration-two"></div>
+
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-icon">CS</div>
+      <div>
+        <strong>Central</strong>
+        <span>DE SOLICITUDES</span>
+      </div>
+    </div>
+
+    <div class="login-heading">
+      <span class="eyebrow">ÁREA PRIVADA</span>
+      <h1>Bienvenido de nuevo</h1>
+      <p>Accede para gestionar las solicitudes de tus páginas web.</p>
+    </div>
+
+    <form (ngSubmit)="login()">
+      <label for="loginEmail">Correo electrónico</label>
+      <div class="input-wrap">
+        <span class="input-icon">✉</span>
+        <input
+          id="loginEmail"
+          type="email"
+          name="loginEmail"
+          [(ngModel)]="loginEmail"
+          placeholder="tu@correo.com"
+          autocomplete="username"
+          required
+        />
+      </div>
+
+      <label for="loginPassword">Contraseña</label>
+      <div class="input-wrap">
+        <span class="input-icon">⌑</span>
+        <input
+          id="loginPassword"
+          type="password"
+          name="loginPassword"
+          [(ngModel)]="loginPassword"
+          placeholder="Introduce tu contraseña"
+          autocomplete="current-password"
+          required
+        />
+      </div>
+
+      <div class="alert alert-error" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button class="login-button" type="submit" [disabled]="submittingLogin">
+        {{ submittingLogin ? 'Entrando...' : 'Iniciar sesión' }}
+        <span>→</span>
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <span class="secure-dot"></span>
+      Acceso privado y protegido
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================
+     APLICACIÓN PRINCIPAL
+====================================================== -->
+
+<div class="app-shell" *ngIf="!loading && user">
+  <!-- Fondo del menú en móvil -->
+  <div class="sidebar-backdrop" *ngIf="sidebarOpen" (click)="sidebarOpen = false"></div>
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar" [class.sidebar-open]="sidebarOpen">
+    <div class="sidebar-brand">
+      <div class="brand-icon">CS</div>
+      <div class="brand-text">
+        <strong>Central</strong>
+        <span>DE SOLICITUDES</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section-label">GESTIÓN</div>
+
+    <button
+      class="nav-item"
+      [class.active]="activeFilter === 'pending'"
+      (click)="setFilter('pending')"
+    >
+      <span class="nav-icon">▣</span>
+      <span>Solicitudes nuevas</span>
+      <span class="nav-count" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
+    </button>
+
+    <button
+      class="nav-item"
+      [class.active]="activeFilter === 'reviewed'"
+      (click)="setFilter('reviewed')"
+    >
+      <span class="nav-icon">✓</span>
+      <span>Ya revisadas</span>
+      <span class="nav-count muted" *ngIf="reviewedCount > 0">{{ reviewedCount }}</span>
+    </button>
+
+    <button class="nav-item" [class.active]="activeFilter === 'all'" (click)="setFilter('all')">
+      <span class="nav-icon">▤</span>
+      <span>Todas las solicitudes</span>
+      <span class="nav-count muted">{{ totalCount }}</span>
+    </button>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section-label">PÁGINAS WEB</div>
+
+    <button
+      class="source-nav"
+      [class.source-active]="activeSource === 'all'"
+      (click)="setSource('all')"
+    >
+      <span class="source-dot all-dot"></span>
+      <span>Todas las páginas</span>
+    </button>
+
+    <button
+      class="source-nav"
+      [class.source-active]="activeSource === 'armamuebles'"
+      (click)="setSource('armamuebles')"
+    >
+      <span class="source-dot muebles-dot"></span>
+      <span>ArmaMuebles</span>
+      <span class="source-total">{{ mueblesCount }}</span>
+    </button>
+
+    <button
+      class="source-nav"
+      [class.source-active]="activeSource === 'obralocalmadrid'"
+      (click)="setSource('obralocalmadrid')"
+    >
+      <span class="source-dot obras-dot"></span>
+      <span>ObraLocalMadrid</span>
+      <span class="source-total">{{ obrasCount }}</span>
+    </button>
+
+    <button
+      class="source-nav"
+      [class.source-active]="activeSource === 'mudanzas360'"
+      (click)="setSource('mudanzas360')"
+    >
+      <span class="source-dot mudanzas-dot"></span>
+      <span>Mudanzas360</span>
+      <span class="source-total">{{ mudanzasCount }}</span>
+    </button>
+
+    <button
+      class="source-nav"
+      *ngIf="tramoCount > 0"
+      [class.source-active]="activeSource === 'tramo'"
+      (click)="setSource('tramo')"
+    >
+      <span class="source-dot tramo-dot"></span>
+      <span>Tramo (antiguo)</span>
+      <span class="source-total">{{ tramoCount }}</span>
+    </button>
+
+    <div class="sidebar-bottom">
+      <div class="account-card">
+        <div class="account-avatar">{{ getInitials(user.email) }}</div>
+        <div class="account-info">
+          <strong>Administrador</strong>
+          <span>{{ user.email }}</span>
+        </div>
+        <button class="logout-button" title="Cerrar sesión" (click)="logout()">↗</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO -->
+
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu" (click)="sidebarOpen = !sidebarOpen">☰</button>
+
+        <div>
+          <div class="breadcrumb">GESTIÓN / <strong>CENTRAL</strong></div>
+          <h1>
+            {{
+              activeFilter === 'pending'
+                ? 'Solicitudes nuevas'
+                : activeFilter === 'reviewed'
+                  ? 'Solicitudes revisadas'
+                  : 'Todas las solicitudes'
+            }}
+          </h1>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="live-status">
+          <span></span>
+          Sistema conectado
+        </div>
+
+        <button class="refresh-button" (click)="loadRequests()" [disabled]="loadingRequests">
+          <span [class.rotating]="loadingRequests">↻</span>
+          Actualizar
+        </button>
+      </div>
+    </header>
+
+    <!-- MENSAJE DE ERROR -->
+
+    <div class="alert alert-error main-alert" *ngIf="errorMessage && user">
+      <span>{{ errorMessage }}</span>
+      <button (click)="clearMessages()">×</button>
+    </div>
+
+    <!-- RESUMEN (tarjetas clicables) -->
+
+    <section class="stats-grid">
+      <button
+        type="button"
+        class="stat-card stat-pending"
+        [class.stat-active]="activeFilter === 'pending'"
+        (click)="goToSection('pending')"
+        style="animation-delay: 0ms"
+      >
+        <div class="stat-top">
+          <span class="stat-label">SOLICITUDES NUEVAS</span>
+          <span class="stat-icon">✉</span>
+        </div>
+        <div class="stat-number" *ngFor="let n of [pendingCount]">{{ n }}</div>
+        <span class="stat-description">Pendientes de revisar</span>
+        <span class="stat-link">Ver nuevas <b>→</b></span>
+      </button>
+
+      <button
+        type="button"
+        class="stat-card stat-reviewed"
+        [class.stat-active]="activeFilter === 'reviewed'"
+        (click)="goToSection('reviewed')"
+        style="animation-delay: 80ms"
+      >
+        <div class="stat-top">
+          <span class="stat-label">YA REVISADAS</span>
+          <span class="stat-icon">✓</span>
+        </div>
+        <div class="stat-number" *ngFor="let n of [reviewedCount]">{{ n }}</div>
+        <span class="stat-description">Solicitudes que ya has visto</span>
+        <span class="stat-link">Ver revisadas <b>→</b></span>
+      </button>
+
+      <button
+        type="button"
+        class="stat-card stat-total"
+        [class.stat-active]="activeFilter === 'all'"
+        (click)="goToSection('all')"
+        style="animation-delay: 160ms"
+      >
+        <div class="stat-top">
+          <span class="stat-label">TOTAL RECIBIDAS</span>
+          <span class="stat-icon">▤</span>
+        </div>
+        <div class="stat-number" *ngFor="let n of [totalCount]">{{ n }}</div>
+        <span class="stat-description">De todas tus páginas web</span>
+        <span class="stat-link">Ver todas <b>→</b></span>
+      </button>
+    </section>
+
+    <!-- BANDEJA -->
+
+    <section class="workspace" id="inbox">
+      <div class="inbox-panel">
+        <div class="inbox-heading">
+          <div>
+            <h2>Bandeja de entrada</h2>
+            <p>Pulsa una solicitud para verla en grande.</p>
+          </div>
+
+          <span class="results-count">{{ filteredRequests.length }} resultados</span>
+        </div>
+
+        <!-- Pestañas rápidas -->
+
+        <div class="inbox-tabs">
+          <button
+            type="button"
+            class="tab"
+            [class.tab-active]="activeFilter === 'pending'"
+            (click)="setFilter('pending')"
+          >
+            Nuevas <span class="tab-count">{{ pendingCount }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="tab"
+            [class.tab-active]="activeFilter === 'reviewed'"
+            (click)="setFilter('reviewed')"
+          >
+            Revisadas <span class="tab-count">{{ reviewedCount }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="tab"
+            [class.tab-active]="activeFilter === 'all'"
+            (click)="setFilter('all')"
+          >
+            Todas <span class="tab-count">{{ totalCount }}</span>
+          </button>
+        </div>
+
+        <div class="filters-bar">
+          <div class="search-box">
+            <span>⌕</span>
+            <input
+              type="text"
+              [(ngModel)]="searchTerm"
+              placeholder="Buscar cliente, teléfono o servicio..."
+            />
+            <button *ngIf="searchTerm" (click)="searchTerm = ''">×</button>
+          </div>
+
+          <select [(ngModel)]="activeSource" aria-label="Filtrar por página web">
+            <option value="all">Todas las páginas</option>
+            <option value="armamuebles">ArmaMuebles</option>
+            <option value="obralocalmadrid">ObraLocalMadrid</option>
+            <option value="mudanzas360">Mudanzas360</option>
+            <option value="tramo" *ngIf="tramoCount > 0">Tramo (antiguo)</option>
+          </select>
+        </div>
+
+        <div class="inbox-list">
+          <div class="list-loading" *ngIf="loadingRequests">
+            <div class="loader"></div>
+            <span>Cargando solicitudes...</span>
+          </div>
+
+          <ng-container *ngIf="!loadingRequests">
+            <button
+              type="button"
+              class="request-card"
+              *ngFor="let request of filteredRequests; let i = index; trackBy: trackById"
+              [ngClass]="getSourceTheme(request.source)"
+              [class.request-selected]="selectedRequest?.id === request.id"
+              [style.animation-delay.ms]="getDelay(i)"
+              (click)="selectRequest(request)"
+            >
+              <div class="request-avatar">
+                {{ getInitials(request.name) }}
+              </div>
+
+              <div class="request-main">
+                <div class="request-name-line">
+                  <strong>{{ request.name || 'Cliente sin nombre' }}</strong>
+                  <span class="source-badge" [ngClass]="getSourceClass(request.source)">
+                    {{ getSourceLabel(request.source) }}
+                  </span>
+                  <span class="test-badge" *ngIf="isTest(request)">PRUEBA</span>
+                </div>
+
+                <p class="request-service">
+                  {{ request.service || 'Solicitud de presupuesto' }}
+                </p>
+
+                <p class="request-description">
+                  {{ request.description || 'Sin descripción adicional.' }}
+                </p>
+
+                <div class="request-meta">
+                  <span>☎ {{ request.phone || 'Sin teléfono' }}</span>
+                  <span>·</span>
+                  <span>{{ timeAgo(request.created_at) }}</span>
+                </div>
+              </div>
+
+              <div class="request-status" [class.status-reviewed]="request.reviewed_at">
+                <span class="status-dot" [class.reviewed-dot]="request.reviewed_at"></span>
+                <span>{{ request.reviewed_at ? 'Revisada' : 'Nueva' }}</span>
+              </div>
+
+              <span class="request-open">Ver detalle →</span>
+            </button>
+
+            <div class="empty-state" *ngIf="filteredRequests.length === 0">
+              <div class="empty-icon">✉</div>
+              <h3>No hay solicitudes</h3>
+              <p>
+                {{
+                  searchTerm
+                    ? 'No encontramos resultados para tu búsqueda.'
+                    : activeFilter === 'pending'
+                      ? 'Cuando alguien envíe un formulario desde tus webs, aparecerá aquí.'
+                      : 'No hay solicitudes en esta sección.'
+                }}
+              </p>
+              <button class="clear-search" *ngIf="searchTerm" (click)="searchTerm = ''">
+                Limpiar búsqueda
+              </button>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </section>
+
+    <footer class="main-footer">
+      <span>Central de Solicitudes</span>
+      <span>Panel privado de gestión</span>
+    </footer>
+  </main>
+
+  <!-- =====================================================
+       VENTANA GRANDE DE DETALLE
+  ====================================================== -->
+
+  <div
+    class="modal-backdrop"
+    *ngIf="selectedRequest"
+    [class.closing]="closing"
+    (click)="closeModal()"
+  >
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      [class.closing]="closing"
+      (click)="$event.stopPropagation()"
+    >
+      <ng-container *ngFor="let req of selectedList; trackBy: trackById">
+        <div
+          class="modal-inner"
+          [ngClass]="getSourceTheme(req.source)"
+          [class.nav-next]="navDirection === 'nav-next'"
+          [class.nav-prev]="navDirection === 'nav-prev'"
+        >
+          <!-- CABECERA -->
+
+          <div class="modal-hero">
+            <div class="hero-orb hero-orb-one"></div>
+            <div class="hero-orb hero-orb-two"></div>
+
+            <div class="hero-top">
+              <div class="hero-nav">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  (click)="goToAdjacent(-1)"
+                  [disabled]="!canGoPrev"
+                  title="Solicitud anterior (←)"
+                >
+                  ‹
+                </button>
+
+                <span class="hero-counter" *ngIf="selectedIndex >= 0">
+                  {{ selectedIndex + 1 }} de {{ filteredRequests.length }}
+                </span>
+
+                <button
+                  type="button"
+                  class="icon-btn"
+                  (click)="goToAdjacent(1)"
+                  [disabled]="!canGoNext"
+                  title="Solicitud siguiente (→)"
+                >
+                  ›
+                </button>
+              </div>
+
+              <button
+                type="button"
+                class="icon-btn close-btn"
+                (click)="closeModal()"
+                title="Cerrar (Esc)"
+              >
+                ×
+              </button>
+            </div>
+
+            <div class="hero-main">
+              <div class="hero-avatar">{{ getInitials(req.name) }}</div>
+
+              <div class="hero-text">
+                <span class="hero-source">{{ getSourceLabel(req.source) }}</span>
+                <h2>{{ req.name || 'Cliente sin nombre' }}</h2>
+                <p class="hero-service">{{ req.service || 'Solicitud de presupuesto' }}</p>
+              </div>
+
+              <div class="hero-status" [class.hero-status-done]="req.reviewed_at">
+                <span class="hero-status-dot"></span>
+                {{ req.reviewed_at ? 'Revisada' : 'Pendiente' }}
+              </div>
+            </div>
+
+            <div class="hero-chips">
+              <span class="hero-chip">◷ {{ formatFullDate(req.created_at) }}</span>
+              <span class="hero-chip">{{ timeAgo(req.created_at) }}</span>
+              <span class="hero-chip hero-chip-test" *ngIf="isTest(req)">SOLICITUD DE PRUEBA</span>
+            </div>
+          </div>
+
+          <!-- CUERPO -->
+
+          <div class="modal-body">
+            <div class="modal-grid">
+              <!-- Contacto -->
+              <section class="info-card">
+                <h4 class="card-title">DATOS DE CONTACTO</h4>
+
+                <div class="contact-row">
+                  <span class="contact-icon">☎</span>
+                  <div class="contact-text">
+                    <span>Teléfono</span>
+                    <strong>{{ req.phone || 'No indicado' }}</strong>
+                  </div>
+                  <button
+                    type="button"
+                    class="mini-btn"
+                    *ngIf="req.phone"
+                    (click)="copyText(req.phone, 'Teléfono copiado')"
+                    title="Copiar teléfono"
+                  >
+                    ⧉
+                  </button>
+                </div>
+
+                <div class="contact-row">
+                  <span class="contact-icon">✉</span>
+                  <div class="contact-text">
+                    <span>Correo electrónico</span>
+                    <strong>{{ req.email || 'No indicado' }}</strong>
+                  </div>
+                  <button
+                    type="button"
+                    class="mini-btn"
+                    *ngIf="req.email"
+                    (click)="copyText(req.email, 'Correo copiado')"
+                    title="Copiar correo"
+                  >
+                    ⧉
+                  </button>
+                </div>
+
+                <div class="contact-row">
+                  <span class="contact-icon">◷</span>
+                  <div class="contact-text">
+                    <span>Fecha de recepción</span>
+                    <strong>{{ formatFullDate(req.created_at) }}</strong>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Resumen -->
+              <section class="info-card">
+                <h4 class="card-title">RESUMEN DE LA SOLICITUD</h4>
+
+                <div class="summary-row">
+                  <span>Servicio</span>
+                  <strong>{{ req.service || 'No indicado' }}</strong>
+                </div>
+
+                <div class="summary-row">
+                  <span>Página web</span>
+                  <strong>
+                    <span class="source-badge" [ngClass]="getSourceClass(req.source)">
+                      {{ getSourceLabel(req.source) }}
+                    </span>
+                  </strong>
+                </div>
+
+                <div class="summary-row">
+                  <span>Estado</span>
+                  <strong>
+                    <span class="state-pill" [class.state-done]="req.reviewed_at">
+                      {{ req.reviewed_at ? 'Revisada' : 'Pendiente de revisar' }}
+                    </span>
+                  </strong>
+                </div>
+
+                <div class="summary-row">
+                  <span>Referencia</span>
+                  <strong class="mono">#{{ shortId(req.id) }}</strong>
+                </div>
+              </section>
+
+              <!-- Descripción -->
+              <section class="info-card span-2">
+                <h4 class="card-title">DESCRIPCIÓN DEL CLIENTE</h4>
+                <blockquote class="description-quote">
+                  {{ req.description || 'El cliente no ha añadido una descripción.' }}
+                </blockquote>
+              </section>
+
+              <!-- Datos adicionales -->
+              <section class="info-card span-2" *ngIf="getDetails(req.details).length > 0">
+                <h4 class="card-title">INFORMACIÓN ADICIONAL</h4>
+
+                <div class="details-grid">
+                  <div class="detail-chip" *ngFor="let item of getDetails(req.details)">
+                    <span>{{ formatDetailKey(item[0]) }}</span>
+                    <strong>{{ formatDetailValue(item[1]) }}</strong>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Línea de tiempo -->
+              <section class="info-card span-2">
+                <h4 class="card-title">SEGUIMIENTO</h4>
+
+                <div class="timeline">
+                  <div class="timeline-step done">
+                    <span class="timeline-dot"></span>
+                    <div>
+                      <strong>Recibida</strong>
+                      <span>{{ formatFullDate(req.created_at) }}</span>
+                    </div>
+                  </div>
+
+                  <div class="timeline-line" [class.line-done]="req.reviewed_at"></div>
+
+                  <div class="timeline-step" [class.done]="req.reviewed_at">
+                    <span class="timeline-dot"></span>
+                    <div>
+                      <strong>Revisada</strong>
+                      <span>{{
+                        req.reviewed_at ? formatFullDate(req.reviewed_at) : 'Pendiente'
+                      }}</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Fotografías -->
+              <section class="info-card span-2" *ngIf="req.photos?.length">
+                <h4 class="card-title">FOTOGRAFÍAS ADJUNTAS ({{ req.photos?.length }})</h4>
+
+                <div class="photos-grid">
+                  <a
+                    *ngFor="let photo of req.photos"
+                    [href]="photo"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img [src]="photo" alt="Fotografía enviada por el cliente" />
+                  </a>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <!-- ACCIONES -->
+
+          <div class="modal-footer">
+            <a
+              class="btn btn-whatsapp"
+              *ngIf="req.phone"
+              [href]="getWhatsappUrl(req.phone)"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>◉</span> WhatsApp
+            </a>
+
+            <a class="btn btn-outline" *ngIf="req.phone" [href]="'tel:' + req.phone">
+              <span>☎</span> Llamar
+            </a>
+
+            <a class="btn btn-outline" *ngIf="req.email" [href]="'mailto:' + req.email">
+              <span>✉</span> Email
+            </a>
+
+            <button
+              type="button"
+              class="btn btn-primary btn-push"
+              *ngIf="!req.reviewed_at"
+              (click)="markAsReviewed(req)"
+            >
+              <span>✓</span> LISTO · Marcar como revisada
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-soft btn-push"
+              *ngIf="req.reviewed_at"
+              (click)="markAsPending(req)"
+            >
+              <span>↶</span> Volver a pendientes
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================
+     AVISO (toast)
+====================================================== -->
+
+<div class="toast" *ngIf="successMessage">
+  <span class="toast-icon">✓</span>
+  <span>{{ successMessage }}</span>
+  <button type="button" (click)="clearMessages()">×</button>
+</div>
