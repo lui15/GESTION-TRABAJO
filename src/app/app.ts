@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  HostBinding,
+  HostListener,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 
@@ -20,6 +27,19 @@ interface ClientRequest {
 }
 
 type RequestFilter = 'pending' | 'reviewed' | 'all';
+
+type ThemeMode = 'light' | 'dark' | 'auto';
+
+type SortMode = 'newest' | 'oldest' | 'name';
+
+interface RequestGroup {
+  label: string;
+  items: ClientRequest[];
+}
+
+const THEME_STORAGE_KEY = 'central-theme';
+const ACCENT_STORAGE_KEY = 'central-accent';
+const SORT_STORAGE_KEY = 'central-sort';
 
 @Component({
   selector: 'app-root',
@@ -79,13 +99,142 @@ export class App implements OnInit, OnDestroy {
 
   sidebarOpen = false;
 
+  sortMode: SortMode = 'newest';
+
+  // Selección múltiple
+  selectionMode = false;
+  selectedIds = new Set<string>();
+
+  // Eliminación
+  deleteTarget: string[] | null = null;
+  deleting = false;
+  deleteError = '';
+
+  // =====================================================
+  // APARIENCIA (modo claro / oscuro y color principal)
+  // =====================================================
+
+  readonly accentOptions = [
+    { id: 'indigo', label: 'Índigo', color: '#4f46e5' },
+    { id: 'blue', label: 'Azul', color: '#2563eb' },
+    { id: 'teal', label: 'Turquesa', color: '#0d9488' },
+    { id: 'green', label: 'Verde', color: '#16a34a' },
+    { id: 'orange', label: 'Naranja', color: '#ea580c' },
+    { id: 'rose', label: 'Rosa', color: '#e11d48' },
+    { id: 'violet', label: 'Violeta', color: '#7c3aed' },
+    { id: 'slate', label: 'Grafito', color: '#334155' },
+  ];
+
+  themeMode: ThemeMode = 'auto';
+  accent = 'indigo';
+  systemDark = false;
+  themePanelOpen = false;
+
+  private mediaQuery: MediaQueryList | null = null;
+
+  private readonly mediaListener = (event: MediaQueryListEvent): void => {
+    this.systemDark = event.matches;
+    this.applyDocumentTheme();
+    this.cdr.markForCheck();
+  };
+
+  get isDark(): boolean {
+    return this.themeMode === 'dark' || (this.themeMode === 'auto' && this.systemDark);
+  }
+
+  @HostBinding('class')
+  get hostClass(): string {
+    return `accent-${this.accent}${this.isDark ? ' dark' : ''}`;
+  }
+
   constructor(private cdr: ChangeDetectorRef) {}
+
+  private initAppearance(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const storedTheme = this.readStorage(THEME_STORAGE_KEY);
+    if (storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'auto') {
+      this.themeMode = storedTheme;
+    }
+
+    const storedAccent = this.readStorage(ACCENT_STORAGE_KEY);
+    if (storedAccent && this.accentOptions.some((option) => option.id === storedAccent)) {
+      this.accent = storedAccent;
+    }
+
+    const storedSort = this.readStorage(SORT_STORAGE_KEY);
+    if (storedSort === 'newest' || storedSort === 'oldest' || storedSort === 'name') {
+      this.sortMode = storedSort;
+    }
+
+    if (window.matchMedia) {
+      this.mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      this.systemDark = this.mediaQuery.matches;
+      this.mediaQuery.addEventListener?.('change', this.mediaListener);
+    }
+
+    this.applyDocumentTheme();
+  }
+
+  setThemeMode(mode: ThemeMode): void {
+    this.themeMode = mode;
+    this.writeStorage(THEME_STORAGE_KEY, mode);
+    this.applyDocumentTheme();
+  }
+
+  /** Cambia directamente entre modo claro y oscuro. */
+  toggleDarkMode(): void {
+    this.setThemeMode(this.isDark ? 'light' : 'dark');
+  }
+
+  setAccent(accent: string): void {
+    this.accent = accent;
+    this.writeStorage(ACCENT_STORAGE_KEY, accent);
+  }
+
+  setSort(mode: SortMode): void {
+    this.sortMode = mode;
+    this.writeStorage(SORT_STORAGE_KEY, mode);
+  }
+
+  private applyDocumentTheme(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const dark = this.isDark;
+    document.documentElement.dataset['theme'] = dark ? 'dark' : 'light';
+
+    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+      meta.setAttribute('content', dark ? '#0b0d12' : '#f4f5f9');
+    });
+  }
+
+  private readStorage(key: string): string | null {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  }
+
+  private writeStorage(key: string, value: string): void {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // Almacenamiento no disponible (modo privado, etc.)
+    }
+  }
 
   // =====================================================
   // INICIALIZACIÓN
   // =====================================================
 
   async ngOnInit(): Promise<void> {
+    this.initAppearance();
+
     if (this.SUPABASE_URL.includes('PEGA_AQUI') || this.SUPABASE_ANON_KEY.includes('PEGA_AQUI')) {
       this.errorMessage = 'Configura la URL y la clave pública de Supabase en app.ts.';
 
@@ -192,6 +341,8 @@ export class App implements OnInit, OnDestroy {
       clearTimeout(this.closeTimer);
     }
 
+    this.mediaQuery?.removeEventListener?.('change', this.mediaListener);
+
     this.lockScroll(false);
   }
 
@@ -199,8 +350,34 @@ export class App implements OnInit, OnDestroy {
   // TECLADO (ventana de detalle)
   // =====================================================
 
+  /** Cierra el panel de colores al pulsar fuera de él. */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.themePanelOpen) {
+      return;
+    }
+
+    const target = event.target as Element | null;
+
+    if (!target?.closest?.('.theme-picker')) {
+      this.themePanelOpen = false;
+    }
+  }
+
   @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
+    if (this.deleteTarget) {
+      if (event.key === 'Escape') {
+        this.cancelDelete();
+      }
+      return;
+    }
+
+    if (this.themePanelOpen && event.key === 'Escape') {
+      this.themePanelOpen = false;
+      return;
+    }
+
     if (!this.selectedRequest) {
       return;
     }
@@ -315,6 +492,16 @@ export class App implements OnInit, OnDestroy {
 
       this.requests = (data ?? []) as ClientRequest[];
 
+      // Quitar de la selección múltiple las que ya no existen.
+      if (this.selectedIds.size) {
+        const existing = new Set(this.requests.map((item) => item.id));
+        this.selectedIds.forEach((id) => {
+          if (!existing.has(id)) {
+            this.selectedIds.delete(id);
+          }
+        });
+      }
+
       // Mantener seleccionada la solicitud
       // si sigue existiendo.
       if (this.selectedRequest) {
@@ -412,11 +599,77 @@ export class App implements OnInit, OnDestroy {
       });
     }
 
+    // La consulta ya llega ordenada de más reciente a más antigua.
+    if (this.sortMode === 'oldest') {
+      result.reverse();
+    } else if (this.sortMode === 'name') {
+      result.sort((a, b) =>
+        (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' }),
+      );
+    }
+
     return result;
+  }
+
+  /** Solicitudes agrupadas por fecha (o por inicial si se ordena por nombre). */
+  get groupedRequests(): RequestGroup[] {
+    const groups: RequestGroup[] = [];
+
+    for (const request of this.filteredRequests) {
+      const label =
+        this.sortMode === 'name'
+          ? (request.name || '#').trim().charAt(0).toUpperCase() || '#'
+          : this.getDateGroup(request.created_at);
+
+      let group = groups[groups.length - 1];
+
+      if (!group || group.label !== label) {
+        group = { label, items: [] };
+        groups.push(group);
+      }
+
+      group.items.push(request);
+    }
+
+    return groups;
+  }
+
+  trackByLabel(_: number, group: RequestGroup): string {
+    return group.label;
+  }
+
+  private getDateGroup(date: string): string {
+    const created = new Date(date);
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const dayMs = 86400000;
+    const time = created.getTime();
+
+    if (time >= startOfToday) {
+      return 'Hoy';
+    }
+
+    if (time >= startOfToday - dayMs) {
+      return 'Ayer';
+    }
+
+    if (time >= startOfToday - 6 * dayMs) {
+      return 'Esta semana';
+    }
+
+    if (created.getFullYear() === now.getFullYear() && created.getMonth() === now.getMonth()) {
+      return 'Este mes';
+    }
+
+    const label = created.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+
+    return label.charAt(0).toUpperCase() + label.slice(1);
   }
 
   setFilter(filter: RequestFilter): void {
     this.activeFilter = filter;
+
+    this.selectedIds.clear();
 
     this.clearSelection();
 
@@ -425,6 +678,8 @@ export class App implements OnInit, OnDestroy {
 
   setSource(source: string): void {
     this.activeSource = source;
+
+    this.selectedIds.clear();
 
     this.clearSelection();
 
@@ -682,6 +937,183 @@ export class App implements OnInit, OnDestroy {
   }
 
   // =====================================================
+  // SELECCIÓN MÚLTIPLE
+  // =====================================================
+
+  toggleSelectionMode(): void {
+    this.selectionMode = !this.selectionMode;
+
+    this.selectedIds.clear();
+  }
+
+  onCardClick(request: ClientRequest): void {
+    if (this.selectionMode) {
+      this.toggleSelected(request.id);
+    } else {
+      this.selectRequest(request);
+    }
+  }
+
+  toggleSelected(id: string): void {
+    if (this.selectedIds.has(id)) {
+      this.selectedIds.delete(id);
+    } else {
+      this.selectedIds.add(id);
+    }
+  }
+
+  isSelected(id: string): boolean {
+    return this.selectedIds.has(id);
+  }
+
+  get allVisibleSelected(): boolean {
+    const visible = this.filteredRequests;
+
+    return visible.length > 0 && visible.every((request) => this.selectedIds.has(request.id));
+  }
+
+  toggleSelectAll(): void {
+    if (this.allVisibleSelected) {
+      this.selectedIds.clear();
+    } else {
+      this.filteredRequests.forEach((request) => this.selectedIds.add(request.id));
+    }
+  }
+
+  async markSelectedAsReviewed(): Promise<void> {
+    const ids = this.requests
+      .filter((request) => this.selectedIds.has(request.id) && !request.reviewed_at)
+      .map((request) => request.id);
+
+    if (!ids.length) {
+      this.showSuccess('Las solicitudes seleccionadas ya estaban revisadas.');
+      return;
+    }
+
+    const reviewedAt = new Date().toISOString();
+
+    const { error } = await this.supabase
+      .from('requests')
+      .update({ reviewed_at: reviewedAt })
+      .in('id', ids);
+
+    if (error) {
+      this.errorMessage = 'No se pudieron marcar las solicitudes como revisadas.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const updated = new Set(ids);
+
+    this.requests = this.requests.map((item) =>
+      updated.has(item.id) ? { ...item, reviewed_at: reviewedAt } : item,
+    );
+
+    this.selectedIds.clear();
+    this.selectionMode = false;
+
+    this.showSuccess(
+      ids.length === 1 ? 'Solicitud marcada como revisada.' : `${ids.length} solicitudes revisadas.`,
+    );
+  }
+
+  // =====================================================
+  // ELIMINACIÓN
+  // =====================================================
+
+  askDelete(ids: string[]): void {
+    if (!ids.length) {
+      return;
+    }
+
+    this.deleteError = '';
+    this.deleteTarget = [...ids];
+  }
+
+  askDeleteSelected(): void {
+    this.askDelete([...this.selectedIds]);
+  }
+
+  cancelDelete(): void {
+    if (this.deleting) {
+      return;
+    }
+
+    this.deleteTarget = null;
+    this.deleteError = '';
+  }
+
+  get deleteTargetName(): string {
+    if (!this.deleteTarget || this.deleteTarget.length !== 1) {
+      return '';
+    }
+
+    const request = this.requests.find((item) => item.id === this.deleteTarget?.[0]);
+
+    return request?.name || 'Cliente sin nombre';
+  }
+
+  async confirmDelete(): Promise<void> {
+    const ids = this.deleteTarget;
+
+    if (!ids?.length || this.deleting) {
+      return;
+    }
+
+    this.deleting = true;
+    this.deleteError = '';
+    this.cdr.markForCheck();
+
+    try {
+      const { data, error } = await this.supabase
+        .from('requests')
+        .delete()
+        .in('id', ids)
+        .select('id');
+
+      if (error) {
+        throw error;
+      }
+
+      const deleted = new Set(((data ?? []) as { id: string }[]).map((row) => row.id));
+
+      // Con RLS, si no hay permiso de borrado no da error: simplemente no borra nada.
+      if (deleted.size === 0) {
+        throw new Error('DELETE_BLOCKED');
+      }
+
+      this.requests = this.requests.filter((item) => !deleted.has(item.id));
+
+      deleted.forEach((id) => this.selectedIds.delete(id));
+
+      if (this.selectionMode && this.selectedIds.size === 0) {
+        this.selectionMode = false;
+      }
+
+      if (this.selectedRequest && deleted.has(this.selectedRequest.id)) {
+        this.clearSelection();
+      }
+
+      this.deleteTarget = null;
+
+      if (deleted.size < ids.length) {
+        this.errorMessage = 'Algunas solicitudes no se pudieron eliminar.';
+      }
+
+      this.showSuccess(
+        deleted.size === 1 ? 'Solicitud eliminada.' : `${deleted.size} solicitudes eliminadas.`,
+      );
+    } catch (error: any) {
+      console.error('ERROR AL ELIMINAR:', error);
+
+      this.deleteError = this.getErrorMessage(error);
+    } finally {
+      this.deleting = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  // =====================================================
   // WHATSAPP
   // =====================================================
 
@@ -918,6 +1350,10 @@ export class App implements OnInit, OnDestroy {
 
   private getErrorMessage(error: any): string {
     const message = error?.message ?? '';
+
+    if (message === 'DELETE_BLOCKED') {
+      return 'Supabase no ha permitido eliminar. Falta activar el permiso de borrado en la base de datos.';
+    }
 
     if (message === 'TIMEOUT_REQUESTS') {
       return 'Las solicitudes tardan demasiado en cargar. Pulsa Actualizar o recarga la página.';

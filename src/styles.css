@@ -1,1 +1,22 @@
-/* You can add global styles to this file, and also import other style files */
+/* Estilos globales */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #f4f5f9;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overscroll-behavior-y: none;
+}
+
+/* El tema lo controla el botón de colores (data-theme en <html>) */
+html[data-theme='dark'],
+html[data-theme='dark'] body {
+  background: #0b0d12;
+  color-scheme: dark;
+}
