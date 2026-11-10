@@ -41,3 +41,12 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Secretos y archivos locales (nunca a git)
+.env
+.env.*
+android/app/google-services.json
+supabase/.temp/
+supabase/functions/.env
+*.keystore
+*.jks
