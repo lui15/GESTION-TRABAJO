@@ -146,6 +146,28 @@
       </div>
     </ion-list>
 
+    <!-- SEGURIDAD (solo en la app del móvil) -->
+    @if (huella.esNativo) {
+      <ion-list [inset]="true" class="grupo">
+        <ion-list-header><ion-label>Seguridad</ion-label></ion-list-header>
+
+        <ion-item lines="none">
+          <ion-icon slot="start" name="finger-print-outline" />
+          <ion-toggle
+            [checked]="huella.activa()"
+            [disabled]="cambiandoHuella()"
+            (ionChange)="cambiarHuella($event)"
+            justify="space-between"
+          >
+            <ion-label class="ion-text-wrap">
+              Entrar con huella
+              <p>Pide tu huella al abrir la app o al volver a ella tras 1 minuto.</p>
+            </ion-label>
+          </ion-toggle>
+        </ion-item>
+      </ion-list>
+    }
+
     <!-- SESIÓN -->
     <ion-list [inset]="true" class="grupo">
       <ion-item button [detail]="false" (click)="salir()" class="item-salir">

@@ -21,6 +21,7 @@ import { LogoComponent } from '../../componentes/logo.component';
 import { CANALES } from '../../datos/webs';
 import { NotificacionesService } from '../../servicios/notificaciones.service';
 import { AvisosService } from '../../servicios/avisos.service';
+import { HuellaService } from '../../servicios/huella.service';
 import { SupabaseService } from '../../servicios/supabase.service';
 import { COLORES, TemaService } from '../../servicios/tema.service';
 import { iniciales } from '../../utilidades/formato';
@@ -55,6 +56,8 @@ export class AjustesPage {
   protected readonly avisos = inject(AvisosService);
 
   protected readonly noti = inject(NotificacionesService);
+  protected readonly huella = inject(HuellaService);
+  protected readonly cambiandoHuella = signal(false);
 
   protected readonly colores = COLORES;
   protected readonly canales = CANALES;
@@ -133,6 +136,31 @@ export class AjustesPage {
       }
     } finally {
       this.activando.set(false);
+    }
+  }
+
+  protected async cambiarHuella(evento: CustomEvent<{ checked: boolean }>): Promise<void> {
+    const interruptor = evento.target as HTMLIonToggleElement;
+
+    if (!evento.detail.checked) {
+      this.huella.desactivar();
+      await this.avisos.exito('Huella desactivada.');
+      return;
+    }
+
+    this.cambiandoHuella.set(true);
+
+    try {
+      const error = await this.huella.activar();
+
+      if (error) {
+        interruptor.checked = false;
+        await this.avisos.error(error);
+      } else {
+        await this.avisos.exito('Listo. La próxima vez entrarás con tu huella.');
+      }
+    } finally {
+      this.cambiandoHuella.set(false);
     }
   }
 

@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { IonApp, IonRouterOutlet } from '@ionic/angular';
 
+import { BloqueoComponent } from './componentes/bloqueo.component';
+import { HuellaService } from './servicios/huella.service';
 import { NotificacionesService } from './servicios/notificaciones.service';
 import { SolicitudesService } from './servicios/solicitudes.service';
 import { SupabaseService } from './servicios/supabase.service';
@@ -12,17 +14,26 @@ import { registrarIconos } from './utilidades/iconos';
 
 @Component({
   selector: 'app-root',
-  imports: [IonApp, IonRouterOutlet],
+  imports: [IonApp, IonRouterOutlet, BloqueoComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-app>
-      <ion-router-outlet />
+      <ion-router-outlet [attr.aria-hidden]="tapada() ? 'true' : null" [attr.inert]="tapada() ? '' : null" />
+      @if (tapada()) {
+        <app-bloqueo />
+      }
     </ion-app>
   `,
 })
 export class App {
   private readonly sb = inject(SupabaseService);
   private readonly router = inject(Router);
+  private readonly huella = inject(HuellaService);
+
+  /** La huella está activada, hay sesión y aún no se ha puesto. */
+  protected readonly tapada = computed(
+    () => this.huella.bloqueada() && (!this.sb.listo() || !!this.sb.usuario()),
+  );
 
   constructor() {
     registrarIconos();
@@ -52,7 +63,14 @@ export class App {
     });
 
     if (Capacitor.isNativePlatform()) {
-      void this.sb.listoPromesa.then(() => SplashScreen.hide().catch(() => undefined));
+      void this.sb.listoPromesa.then(async () => {
+        await SplashScreen.hide().catch(() => undefined);
+
+        // Al abrir la app con la huella activada, pedirla directamente.
+        if (this.tapada()) {
+          await this.huella.desbloquear();
+        }
+      });
     }
   }
 }
