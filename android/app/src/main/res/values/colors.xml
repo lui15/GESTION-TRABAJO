@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Color por defecto de las notificaciones (el de cada web llega en el aviso) -->
+    <color name="notificacion">#4F46E5</color>
+</resources>

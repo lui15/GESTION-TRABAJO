@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2732" height="2732" viewBox="0 0 2732 2732">
+    
+  <defs>
+    <linearGradient id="fondo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#4338ca"/>
+    </linearGradient>
+    <radialGradient id="brillo" cx="0.25" cy="0.1" r="0.9">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="0.6" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+    <rect width="2732" height="2732" fill="#0b0d12"/>
+    <g transform="translate(1086 1026) scale(0.546875)">
+  <rect width="1024" height="1024" rx="232" fill="url(#fondo)"/>
+  <rect width="1024" height="1024" rx="232" fill="url(#brillo)"/>
+  <g fill="none" stroke="#ffffff" stroke-width="104" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M455.8 329.4A172 172 0 1 0 496 440H356"/>
+    <path d="M620 268H860M740 268V612"/>
+  </g>
+  <g><circle cx="388" cy="784" r="54" fill="#2563eb" stroke="#ffffff" stroke-width="14"/><circle cx="512" cy="784" r="54" fill="#e5484d" stroke="#ffffff" stroke-width="14"/><circle cx="636" cy="784" r="54" fill="#e08a12" stroke="#ffffff" stroke-width="14"/></g></g>
+    <text x="1366" y="1796" text-anchor="middle" font-family="Segoe UI, Roboto, Arial, sans-serif"
+      font-size="120" font-weight="700" fill="#eef0f6" letter-spacing="-2">Gestión Trabajo</text>
+  </svg>

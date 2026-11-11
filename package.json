@@ -9,7 +9,7 @@
     "test": "ng test",
     "build:android": "ng build && npx cap sync android",
     "android": "npx cap open android",
-    "assets": "npx @capacitor/assets generate"
+    "assets": "node scripts/generar-logo.mjs && npx @capacitor/assets generate --android --assetPath assets --iconBackgroundColor #4f46e5 --iconBackgroundColorDark #4f46e5 --splashBackgroundColor #f4f5f9 --splashBackgroundColorDark #0b0d12"
   },
   "prettier": {
     "printWidth": 100,
@@ -61,6 +61,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "sharp": "^0.35.5",
     "typescript": "~5.9.2"
   }
 }

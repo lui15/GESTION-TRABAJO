@@ -33,13 +33,13 @@ let contador = 0;
       <rect width="1024" height="1024" rx="232" [attr.fill]="'url(#lg-' + id + ')'" />
       <rect width="1024" height="1024" rx="232" [attr.fill]="'url(#lb-' + id + ')'" />
       <g fill="none" stroke="#ffffff" stroke-width="104" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M495.8 329.4A172 172 0 1 0 536 440H396" />
-        <path d="M592 268H832M712 268V612" />
+        <path d="M455.8 329.4A172 172 0 1 0 496 440H356" />
+        <path d="M620 268H860M740 268V612" />
       </g>
       <g stroke="#ffffff" stroke-width="14">
-        <circle cx="412" cy="776" r="44" fill="#2563eb" />
-        <circle cx="512" cy="776" r="44" fill="#e5484d" />
-        <circle cx="612" cy="776" r="44" fill="#e08a12" />
+        <circle cx="388" cy="784" r="54" fill="#2563eb" />
+        <circle cx="512" cy="784" r="54" fill="#e5484d" />
+        <circle cx="636" cy="784" r="54" fill="#e08a12" />
       </g>
     </svg>
   `,
