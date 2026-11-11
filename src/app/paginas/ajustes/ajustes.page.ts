@@ -155,7 +155,7 @@ export class AjustesPage {
   protected async avisoLocal(): Promise<void> {
     try {
       await this.noti.avisoLocalDePrueba(this.webPrueba());
-      await this.avisos.exito('Aviso local en 3 segundos. Bloquea el móvil o sal de la app para verlo.');
+      await this.avisos.exito('Aviso enviado: míralo en la barra de notificaciones y tócalo.');
     } catch (error) {
       await this.avisos.error((error as Error).message);
     }

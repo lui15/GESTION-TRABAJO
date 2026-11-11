@@ -344,6 +344,7 @@ export class NotificacionesService {
   /**
    * Aviso local en este móvil (sin Firebase): comprueba canales, icono, color y
    * que al tocarlo se abre el detalle de la solicitud más reciente.
+   * Se muestra al instante (programarlo exigiría el permiso de alarmas exactas).
    */
   async avisoLocalDePrueba(source = 'mudanzas360'): Promise<void> {
     const permiso = await LocalNotifications.requestPermissions();
@@ -365,7 +366,6 @@ export class NotificacionesService {
           channelId: web.canal,
           smallIcon: 'ic_stat_notify',
           iconColor: web.color,
-          schedule: { at: new Date(Date.now() + 3000), allowWhileIdle: true },
           extra: { id: ultima?.id ?? '', source: web.source },
         },
       ],

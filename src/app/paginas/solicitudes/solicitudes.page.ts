@@ -42,7 +42,13 @@ import { FiltroEstado, GrupoSolicitudes, Orden, Solicitud } from '../../modelos/
 import { AvisosService } from '../../servicios/avisos.service';
 import { SolicitudesService } from '../../servicios/solicitudes.service';
 import { TemaService } from '../../servicios/tema.service';
-import { grupoFecha, urlTelefono, urlWhatsapp } from '../../utilidades/formato';
+import {
+  detallesVisibles,
+  formatearValor,
+  grupoFecha,
+  urlTelefono,
+  urlWhatsapp,
+} from '../../utilidades/formato';
 
 const CLAVE_ORDEN = 'central-sort';
 
@@ -129,7 +135,16 @@ export class SolicitudesPage {
       if (web !== 'all' && s.source !== web) return false;
 
       if (termino) {
-        const texto = [s.name, s.phone, s.email, s.service, s.description, getWeb(s.source).nombre]
+        // Igual que el panel anterior, más los datos de `details` (zona, direcciones…).
+        const texto = [
+          s.name,
+          s.phone,
+          s.email,
+          s.service,
+          s.description,
+          getWeb(s.source).nombre,
+          ...detallesVisibles(s.details).map(([, valor]) => formatearValor(valor)),
+        ]
           .join(' ')
           .toLowerCase();
 
