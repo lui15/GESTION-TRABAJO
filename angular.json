@@ -28,7 +28,7 @@
               "node_modules/@ionic/angular/css/typography.css",
               "node_modules/@ionic/angular/css/padding.css",
               "node_modules/@ionic/angular/css/flex-utils.css",
-              "node_modules/@ionic/angular/css/palettes/dark.system.css",
+              "node_modules/@ionic/angular/css/palettes/dark.class.css",
               "src/styles.css"
             ]
           },

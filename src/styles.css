@@ -1,22 +1,324 @@
-/* Estilos globales */
+/* =====================================================
+   TEMA GLOBAL · Gestión Trabajo
+   El color principal (--ion-color-primary) lo pone TemaService.
+   El modo oscuro es la clase .ion-palette-dark en <html>.
+===================================================== */
+
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --ion-font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Superficies */
+  --gt-fondo: #f4f5f9;
+  --gt-superficie: #ffffff;
+  --gt-superficie-2: #f8f9fc;
+  --gt-superficie-3: #eef0f5;
+  --gt-borde: #e6e8ef;
+  --gt-borde-fuerte: #d6d9e3;
+
+  /* Texto */
+  --gt-texto: #121826;
+  --gt-texto-2: #424b5c;
+  --gt-tenue: #7b8496;
+
+  /* Estados */
+  --gt-verde: #10a36b;
+  --gt-verde-suave: #e3f7ee;
+  --gt-ambar: #e08a12;
+  --gt-ambar-suave: #fff4e0;
+  --gt-rojo: #e5484d;
+  --gt-rojo-suave: #ffeceb;
+  --gt-whatsapp: #1fae5b;
+
+  --gt-sombra-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --gt-sombra-sm: 0 1px 3px rgba(16, 24, 40, 0.07), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --gt-sombra-md: 0 10px 28px -8px rgba(16, 24, 40, 0.14), 0 2px 6px rgba(16, 24, 40, 0.04);
+  --gt-sombra-lg: 0 30px 60px -16px rgba(16, 24, 40, 0.3);
+
+  --gt-radio: 16px;
+  --gt-radio-lg: 22px;
+  --gt-suave: cubic-bezier(0.22, 0.9, 0.3, 1);
+
+  /* Variables de Ionic */
+  --ion-background-color: var(--gt-fondo);
+  --ion-background-color-rgb: 244, 245, 249;
+  --ion-text-color: var(--gt-texto);
+  --ion-text-color-rgb: 18, 24, 38;
+  --ion-toolbar-background: var(--gt-fondo);
+  --ion-toolbar-border-color: transparent;
+  --ion-tab-bar-background: color-mix(in srgb, var(--gt-superficie) 88%, transparent);
+  --ion-tab-bar-border-color: var(--gt-borde);
+  --ion-item-background: var(--gt-superficie);
+  --ion-card-background: var(--gt-superficie);
+  --ion-border-color: var(--gt-borde);
+  --ion-color-step-50: #eef0f5;
+  --ion-color-step-100: #e6e8ef;
+
+  --ion-color-success: #10a36b;
+  --ion-color-success-rgb: 16, 163, 107;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #0e8f5e;
+  --ion-color-success-tint: #28ac7a;
+
+  --ion-color-danger: #e5484d;
+  --ion-color-danger-rgb: 229, 72, 77;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #ca3f44;
+  --ion-color-danger-tint: #e85a5f;
+
+  /* Valor por defecto hasta que TemaService aplique el elegido */
+  --ion-color-primary: #4f46e5;
+  --ion-color-primary-rgb: 79, 70, 229;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #463ec9;
+  --ion-color-primary-tint: #6159e8;
+}
+
+:root.ion-palette-dark {
+  --gt-fondo: #0b0d12;
+  --gt-superficie: #14171f;
+  --gt-superficie-2: #191d27;
+  --gt-superficie-3: #222734;
+  --gt-borde: #252a37;
+  --gt-borde-fuerte: #323847;
+
+  --gt-texto: #eef0f6;
+  --gt-texto-2: #b9bfcc;
+  --gt-tenue: #7f8799;
+
+  --gt-verde: #34d399;
+  --gt-verde-suave: rgba(52, 211, 153, 0.14);
+  --gt-ambar: #fbbf24;
+  --gt-ambar-suave: rgba(251, 191, 36, 0.14);
+  --gt-rojo: #ff6b6f;
+  --gt-rojo-suave: rgba(255, 107, 111, 0.14);
+
+  --gt-sombra-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --gt-sombra-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --gt-sombra-md: 0 12px 30px -10px rgba(0, 0, 0, 0.65);
+  --gt-sombra-lg: 0 30px 60px -12px rgba(0, 0, 0, 0.75);
+
+  --ion-background-color: var(--gt-fondo);
+  --ion-background-color-rgb: 11, 13, 18;
+  --ion-text-color: var(--gt-texto);
+  --ion-text-color-rgb: 238, 240, 246;
+  --ion-toolbar-background: var(--gt-fondo);
+  --ion-item-background: var(--gt-superficie);
+  --ion-card-background: var(--gt-superficie);
+  --ion-border-color: var(--gt-borde);
+  --ion-tab-bar-background: color-mix(in srgb, var(--gt-superficie) 85%, transparent);
+  --ion-tab-bar-border-color: var(--gt-borde);
+
+  --ion-color-success: #34d399;
+  --ion-color-success-rgb: 52, 211, 153;
+  --ion-color-success-contrast: #062b1d;
+  --ion-color-success-contrast-rgb: 6, 43, 29;
+  --ion-color-success-shade: #2eba87;
+  --ion-color-success-tint: #48d7a3;
+
+  --ion-color-danger: #ff6b6f;
+  --ion-color-danger-rgb: 255, 107, 111;
+  --ion-color-danger-shade: #e05e62;
+  --ion-color-danger-tint: #ff7a7d;
+
+  color-scheme: dark;
+}
 
 html,
 body {
-  margin: 0;
-  padding: 0;
-  background: #f4f5f9;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
+  background: var(--gt-fondo);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
 }
 
-body {
-  overscroll-behavior-y: none;
+/* ---------- Estructura común ---------- */
+
+.ancho {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 8px 16px calc(24px + env(safe-area-inset-bottom));
 }
 
-/* El tema lo controla el botón de colores (data-theme en <html>) */
-html[data-theme='dark'],
-html[data-theme='dark'] body {
-  background: #0b0d12;
-  color-scheme: dark;
+.titulo-grande {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+ion-toolbar {
+  --padding-start: 12px;
+  --padding-end: 8px;
+  --min-height: 58px;
+}
+
+ion-header.header-md {
+  box-shadow: none;
+}
+
+ion-header[translucent] ion-toolbar,
+.header-translucent ion-toolbar {
+  --background: color-mix(in srgb, var(--gt-fondo) 80%, transparent);
+  backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+}
+
+ion-title {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+ion-button {
+  --border-radius: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+ion-segment-button {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 700;
+}
+
+.solo-escritorio {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .solo-escritorio {
+    display: block;
+  }
+}
+
+/* ---------- Pestañas ---------- */
+
+ion-tab-bar {
+  --border: 1px solid var(--gt-borde);
+  height: 64px;
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+}
+
+ion-tab-button {
+  --color: var(--gt-tenue);
+  --color-selected: var(--ion-color-primary);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+ion-tab-button ion-icon {
+  font-size: 23px;
+  padding: 4px 18px;
+  border-radius: 999px;
+  transition: background 0.25s var(--gt-suave);
+}
+
+ion-tab-button.tab-selected ion-icon {
+  background: color-mix(in srgb, var(--ion-color-primary) 14%, transparent);
+}
+
+ion-tab-button ion-badge {
+  top: 4px;
+  left: calc(50% + 8px);
+  min-width: 18px;
+  font-size: 10.5px;
+  font-weight: 800;
+  border: 2px solid var(--gt-superficie);
+  border-radius: 999px;
+}
+
+/* ---------- Avisos ---------- */
+
+ion-toast.aviso {
+  --border-radius: 16px;
+  --box-shadow: var(--gt-sombra-lg);
+  --width: min(440px, calc(100% - 24px));
+  --start: 0;
+  --end: 0;
+  font-weight: 600;
+}
+
+ion-toast.aviso-nueva {
+  --background: var(--gt-superficie);
+  --color: var(--gt-texto);
+  --border-radius: 18px;
+  --box-shadow: var(--gt-sombra-lg);
+  --width: min(460px, calc(100% - 24px));
+  --button-color: var(--ion-color-primary);
+}
+
+ion-toast.aviso-nueva::part(header) {
+  font-weight: 800;
+  font-size: 15px;
+}
+
+ion-toast.aviso-nueva::part(button) {
+  font-weight: 800;
+}
+
+ion-alert.alerta-confirmar {
+  --border-radius: 22px;
+}
+
+ion-alert.alerta-confirmar .alert-title {
+  font-weight: 800;
+}
+
+ion-alert .boton-peligro {
+  color: var(--ion-color-danger) !important;
+  font-weight: 800 !important;
+}
+
+/* ---------- Aviso de error en página ---------- */
+
+.aviso-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gt-rojo);
+  background: var(--gt-rojo-suave);
+}
+
+.aviso-error ion-icon {
+  flex-shrink: 0;
+  font-size: 20px;
+}
+
+.aviso-error span {
+  flex: 1;
+}
+
+/* ---------- Animaciones ---------- */
+
+@keyframes gt-aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

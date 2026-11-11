@@ -92,13 +92,21 @@ export class SolicitudPage {
   protected readonly prueba = computed(() => (this.s() ? esPrueba(this.s()!) : false));
 
   // Anterior / siguiente según el orden de la lista
-  private readonly posicion = computed(() => this.datos.ordenVisible().indexOf(this.id()));
+  // (si se abre directamente, p. ej. desde una notificación, se usa el orden completo)
+  private readonly orden = computed(() => {
+    const visible = this.datos.ordenVisible();
+
+    return visible.includes(this.id()) ? visible : this.datos.solicitudes().map((x) => x.id);
+  });
+  private readonly posicion = computed(() => this.orden().indexOf(this.id()));
   protected readonly contador = computed(() =>
-    this.posicion() >= 0 ? `${this.posicion() + 1} / ${this.datos.ordenVisible().length}` : '',
+    this.posicion() >= 0 ? `${this.posicion() + 1} / ${this.orden().length}` : '',
   );
-  protected readonly anteriorId = computed(() => this.datos.ordenVisible()[this.posicion() - 1]);
+  protected readonly anteriorId = computed(() =>
+    this.posicion() > 0 ? this.orden()[this.posicion() - 1] : undefined,
+  );
   protected readonly siguienteId = computed(() =>
-    this.posicion() >= 0 ? this.datos.ordenVisible()[this.posicion() + 1] : undefined,
+    this.posicion() >= 0 ? this.orden()[this.posicion() + 1] : undefined,
   );
 
   protected readonly fechaCompleta = fechaCompleta;
