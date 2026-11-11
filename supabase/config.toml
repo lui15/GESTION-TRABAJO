@@ -1,0 +1,7 @@
+# Configuración mínima para la CLI de Supabase (supabase link / db push / functions deploy).
+project_id = "gestion-trabajo"
+
+[functions.notificar-solicitud]
+# La llama el trigger de la base de datos con una cabecera secreta propia
+# (WEBHOOK_SECRET), no con un JWT; el modo "prueba" comprueba la sesión dentro.
+verify_jwt = false

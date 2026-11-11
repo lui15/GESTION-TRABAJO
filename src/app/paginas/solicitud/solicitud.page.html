@@ -1,0 +1,237 @@
+<ion-header class="cabecera-detalle" [style.--web]="color()">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/solicitudes" text="" />
+    </ion-buttons>
+
+    <ion-title>{{ web().emoji }} {{ web().nombre }}</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="ir(-1)" [disabled]="!anteriorId()" aria-label="Solicitud anterior" title="Anterior (←)">
+        <ion-icon slot="icon-only" name="chevron-back" />
+      </ion-button>
+      @if (contador()) {
+        <span class="contador">{{ contador() }}</span>
+      }
+      <ion-button (click)="ir(1)" [disabled]="!siguienteId()" aria-label="Solicitud siguiente" title="Siguiente (→)">
+        <ion-icon slot="icon-only" name="chevron-forward" />
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="contenido-detalle" [style.--web]="color()">
+  @if (s(); as s) {
+    <div class="ancho" [class]="'entrada-' + (direccion() || 'normal')">
+      <!-- CABECERA -->
+      <section class="heroe">
+        <div class="heroe-avatar" aria-hidden="true">{{ web().emoji }}</div>
+        <div class="heroe-texto">
+          <span class="heroe-web">{{ web().nombre }}</span>
+          <h1>{{ s.name || 'Cliente sin nombre' }}</h1>
+          @if (resumen()) {
+            <p>{{ resumen() }}</p>
+          }
+        </div>
+
+        <div class="heroe-chips">
+          <span class="chip-estado" [class.hecha]="s.reviewed_at">
+            <span class="punto"></span>
+            {{ s.reviewed_at ? 'Revisada' : 'Pendiente' }}
+          </span>
+          <span class="chip-claro"><ion-icon name="time-outline" /> {{ haceCuanto(s.created_at) }}</span>
+          @if (prueba()) {
+            <span class="chip-claro chip-prueba"><ion-icon name="flask-outline" /> Prueba</span>
+          }
+        </div>
+      </section>
+
+      <!-- BOTONES GRANDES -->
+      <section class="acciones">
+        @if (enlaceWhatsapp()) {
+          <a class="accion whatsapp" [href]="enlaceWhatsapp()" target="_blank" rel="noopener">
+            <span class="accion-icono"><ion-icon name="logo-whatsapp" /></span>
+            WhatsApp
+          </a>
+        }
+        @if (enlaceTelefono()) {
+          <a class="accion llamar" [href]="enlaceTelefono()">
+            <span class="accion-icono"><ion-icon name="call" /></span>
+            Llamar
+          </a>
+        }
+        @if (enlaceMaps()) {
+          <a class="accion mapa" [href]="enlaceMaps()" target="_blank" rel="noopener">
+            <span class="accion-icono"><ion-icon name="map-outline" /></span>
+            Maps
+          </a>
+        }
+        @if (s.email) {
+          <a class="accion correo" [href]="'mailto:' + s.email">
+            <span class="accion-icono"><ion-icon name="mail-outline" /></span>
+            Email
+          </a>
+        }
+        <button type="button" class="accion copiar" (click)="copiarTodo()">
+          <span class="accion-icono"><ion-icon name="copy-outline" /></span>
+          Copiar
+        </button>
+      </section>
+
+      <!-- SERVICIO -->
+      <section class="bloque">
+        <h2><ion-icon name="document-text-outline" /> Servicio</h2>
+        <dl class="filas">
+          <div class="fila">
+            <dt>Servicio</dt>
+            <dd>{{ s.service || campos()?.servicio || 'No indicado' }}</dd>
+          </div>
+          @for (f of seccion('servicio'); track f.etiqueta) {
+            <div class="fila"><dt>{{ f.etiqueta }}</dt><dd>{{ f.valor }}</dd></div>
+          }
+        </dl>
+
+        @if (s.description) {
+          <blockquote class="descripcion">{{ s.description }}</blockquote>
+        } @else {
+          <p class="sin-dato">El cliente no ha añadido una descripción.</p>
+        }
+      </section>
+
+      <!-- DIRECCIONES -->
+      @if (seccion('direcciones').length) {
+        <section class="bloque">
+          <h2><ion-icon name="location-outline" /> Direcciones</h2>
+          <dl class="filas">
+            @for (f of seccion('direcciones'); track f.etiqueta) {
+              <div class="fila"><dt>{{ f.etiqueta }}</dt><dd>{{ f.valor }}</dd></div>
+            }
+          </dl>
+          @if (enlaceMaps()) {
+            <a class="enlace-mapa" [href]="enlaceMaps()" target="_blank" rel="noopener">
+              <ion-icon name="navigate-outline" /> Abrir en Google Maps
+            </a>
+          }
+        </section>
+      }
+
+      <!-- FECHAS -->
+      <section class="bloque">
+        <h2><ion-icon name="calendar-outline" /> Fechas</h2>
+        <dl class="filas">
+          @for (f of seccion('fechas'); track f.etiqueta) {
+            <div class="fila"><dt>{{ f.etiqueta }}</dt><dd>{{ f.valor }}</dd></div>
+          }
+          <div class="fila"><dt>Recibida</dt><dd>{{ fechaCompleta(s.created_at) }}</dd></div>
+          <div class="fila">
+            <dt>Revisada</dt>
+            <dd>{{ s.reviewed_at ? fechaCompleta(s.reviewed_at) : 'Pendiente' }}</dd>
+          </div>
+        </dl>
+
+        <div class="linea-tiempo" aria-hidden="true">
+          <span class="paso hecho"><ion-icon name="checkmark-circle" /> Recibida</span>
+          <span class="tramo" [class.hecho]="s.reviewed_at"></span>
+          <span class="paso" [class.hecho]="s.reviewed_at"><ion-icon name="checkmark-circle" /> Revisada</span>
+        </div>
+      </section>
+
+      <!-- CONTACTO -->
+      <section class="bloque">
+        <h2><ion-icon name="person-outline" /> Contacto</h2>
+        <dl class="filas">
+          <div class="fila con-boton">
+            <dt>Teléfono</dt>
+            <dd>{{ s.phone || 'No indicado' }}</dd>
+            @if (s.phone) {
+              <ion-button fill="clear" size="small" (click)="copiar(s.phone, 'Teléfono copiado.')" aria-label="Copiar teléfono">
+                <ion-icon slot="icon-only" name="copy-outline" />
+              </ion-button>
+            }
+          </div>
+          <div class="fila con-boton">
+            <dt>Email</dt>
+            <dd>{{ s.email || 'No indicado' }}</dd>
+            @if (s.email) {
+              <ion-button fill="clear" size="small" (click)="copiar(s.email, 'Correo copiado.')" aria-label="Copiar correo">
+                <ion-icon slot="icon-only" name="copy-outline" />
+              </ion-button>
+            }
+          </div>
+          @for (f of seccion('contacto'); track f.etiqueta) {
+            <div class="fila"><dt>{{ f.etiqueta }}</dt><dd>{{ f.valor }}</dd></div>
+          }
+        </dl>
+      </section>
+
+      <!-- FOTOS -->
+      @if (s.photos?.length) {
+        <section class="bloque">
+          <h2><ion-icon name="image-outline" /> Fotografías · {{ s.photos!.length }}</h2>
+          <div class="fotos">
+            @for (foto of s.photos; track foto) {
+              <a [href]="foto" target="_blank" rel="noopener">
+                <img [src]="foto" alt="Fotografía enviada por el cliente" loading="lazy" />
+              </a>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- ORIGEN Y UTM -->
+      <section class="bloque">
+        <h2><ion-icon name="link-outline" /> Origen y UTM</h2>
+        <dl class="filas">
+          <div class="fila">
+            <dt>Web</dt>
+            <dd><span class="chip-web">{{ web().emoji }} {{ web().nombre }}</span></dd>
+          </div>
+          <div class="fila"><dt>Referencia</dt><dd class="mono">#{{ referenciaCorta(s.id) }}</dd></div>
+          @for (f of seccion('origen'); track f.etiqueta) {
+            <div class="fila"><dt>{{ f.etiqueta }}</dt><dd>{{ f.valor }}</dd></div>
+          }
+        </dl>
+      </section>
+    </div>
+  } @else if (buscando() || !datosCargados()) {
+    <div class="centro"><ion-spinner name="crescent" /></div>
+  } @else {
+    <div class="centro no-encontrada">
+      <ion-icon name="alert-circle" />
+      <h2>Solicitud no encontrada</h2>
+      <p>Puede que se haya eliminado.</p>
+      <ion-button fill="outline" (click)="volver()">Volver a la lista</ion-button>
+    </div>
+  }
+</ion-content>
+
+@if (s(); as s) {
+  <ion-footer class="pie-detalle">
+    <ion-toolbar>
+      <div class="pie-acciones">
+        <ion-button
+          class="boton-eliminar"
+          fill="clear"
+          color="danger"
+          (click)="eliminar()"
+          [disabled]="ocupado()"
+          aria-label="Eliminar solicitud"
+        >
+          <ion-icon slot="icon-only" name="trash-outline" />
+        </ion-button>
+
+        <ion-button
+          expand="block"
+          size="large"
+          class="boton-revisar"
+          [color]="s.reviewed_at ? 'medium' : 'success'"
+          (click)="alternarRevisada()"
+          [disabled]="ocupado()"
+        >
+          <ion-icon slot="start" [name]="s.reviewed_at ? 'arrow-undo-outline' : 'checkmark-done-outline'" />
+          {{ s.reviewed_at ? 'Volver a pendientes' : 'Marcar como revisada' }}
+        </ion-button>
+      </div>
+    </ion-toolbar>
+  </ion-footer>
+}

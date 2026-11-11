@@ -1,0 +1,347 @@
+/* Selector de orden: solo el icono */
+.selector-orden {
+  max-width: 44px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+}
+
+.selector-orden::part(text),
+.selector-orden::part(placeholder),
+.selector-orden::part(label) {
+  display: none;
+}
+
+.selector-orden::part(icon) {
+  opacity: 1;
+  margin: 0;
+  font-size: 22px;
+  color: var(--gt-texto-2);
+}
+
+/* Barra de filtros */
+.barra-filtros {
+  --min-height: 0;
+  --padding-top: 0;
+  --padding-bottom: 8px;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+ion-searchbar {
+  --background: var(--gt-superficie);
+  --border-radius: 14px;
+  --box-shadow: var(--gt-sombra-xs);
+  --placeholder-color: var(--gt-tenue);
+  --placeholder-opacity: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2px 14px 8px;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 16px 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  --web: var(--gt-texto);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 13px;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--gt-texto-2);
+  background: var(--gt-superficie);
+  border: 1.5px solid var(--gt-borde);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    background 0.18s,
+    color 0.18s,
+    border-color 0.18s,
+    transform 0.15s;
+}
+
+.chip:active {
+  transform: scale(0.96);
+}
+
+.punto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--web);
+}
+
+.cuenta {
+  min-width: 20px;
+  padding: 1px 6px;
+  font-size: 11.5px;
+  font-weight: 800;
+  text-align: center;
+  color: var(--gt-tenue);
+  background: var(--gt-superficie-3);
+  border-radius: 999px;
+}
+
+.chip.activo {
+  color: #fff;
+  background: var(--web);
+  border-color: var(--web);
+}
+
+.chip.activo:first-child {
+  color: var(--gt-fondo);
+  background: var(--gt-texto);
+  border-color: var(--gt-texto);
+}
+
+.chip.activo .punto {
+  background: #fff;
+}
+
+.chip.activo .cuenta {
+  color: inherit;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.segmento {
+  max-width: 728px;
+  margin: 0 auto;
+  width: calc(100% - 32px);
+  --background: var(--gt-superficie-3);
+  border-radius: 13px;
+  padding: 3px;
+}
+
+ion-segment-button {
+  --indicator-color: var(--gt-superficie);
+  --indicator-box-shadow: var(--gt-sombra-sm);
+  --border-radius: 10px;
+  --color: var(--gt-tenue);
+  --color-checked: var(--gt-texto);
+  --indicator-height: 100%;
+  min-height: 36px;
+  font-size: 13.5px;
+}
+
+ion-segment-button::part(indicator-background) {
+  border-radius: 10px;
+}
+
+ion-segment-button b {
+  margin-left: 3px;
+  font-weight: 800;
+  opacity: 0.6;
+}
+
+/* Lista */
+.pista {
+  margin: 6px 4px 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--gt-tenue);
+}
+
+.grupo-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 18px 4px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--gt-tenue);
+}
+
+.grupo-titulo::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--gt-borde);
+}
+
+.grupo-titulo span {
+  order: 1;
+  min-width: 20px;
+  padding: 1px 6px;
+  font-size: 11px;
+  text-align: center;
+  background: var(--gt-superficie-3);
+  border-radius: 999px;
+}
+
+.grupo-titulo::after {
+  order: 2;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+  background: transparent;
+}
+
+.fila {
+  border-radius: var(--gt-radio-lg);
+  animation: gt-aparecer 0.45s var(--gt-suave) both;
+  animation-delay: var(--retraso, 0ms);
+}
+
+.item-tarjeta {
+  --background: transparent;
+  --background-hover: transparent;
+  --background-activated: transparent;
+  --background-focused: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --min-height: 0;
+  --ripple-color: var(--ion-color-primary);
+  border-radius: var(--gt-radio-lg);
+  transition: transform 0.15s var(--gt-suave);
+}
+
+.item-tarjeta:active {
+  transform: scale(0.985);
+}
+
+ion-item-options {
+  border-radius: var(--gt-radio-lg);
+}
+
+ion-item-option {
+  min-width: 92px;
+  font-size: 12.5px;
+  font-weight: 800;
+  text-transform: none;
+}
+
+ion-item-option ion-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+ion-item-options[side='start'] ion-item-option {
+  border-radius: var(--gt-radio-lg) 0 0 var(--gt-radio-lg);
+}
+
+ion-item-options[side='end'] ion-item-option:last-child {
+  border-radius: 0 var(--gt-radio-lg) var(--gt-radio-lg) 0;
+}
+
+.op-whatsapp {
+  --background: var(--gt-whatsapp);
+  --color: #fff;
+}
+
+/* Esqueletos */
+.esqueleto {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--gt-superficie);
+  border: 1px solid var(--gt-borde);
+  border-radius: var(--gt-radio-lg);
+}
+
+.esq-avatar {
+  width: 46px;
+  height: 46px;
+  margin: 0;
+  border-radius: 15px;
+  flex-shrink: 0;
+}
+
+.esq-lineas {
+  flex: 1;
+}
+
+.esq-lineas ion-skeleton-text {
+  height: 11px;
+  border-radius: 6px;
+}
+
+/* Vacío */
+.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 64px 24px;
+  text-align: center;
+  animation: gt-aparecer 0.45s var(--gt-suave);
+}
+
+.vacio-ilustracion {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  margin-bottom: 12px;
+  border-radius: 32px;
+  color: var(--ion-color-primary);
+  background:
+    radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--ion-color-primary) 30%, transparent), transparent 70%),
+    color-mix(in srgb, var(--ion-color-primary) 10%, var(--gt-superficie));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ion-color-primary) 18%, transparent);
+}
+
+.vacio-ilustracion ion-icon {
+  font-size: 42px;
+}
+
+.vacio h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.vacio p {
+  max-width: 320px;
+  margin: 0 0 8px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--gt-tenue);
+}
+
+/* Pie de la selección múltiple */
+.pie-seleccion ion-toolbar {
+  --background: var(--gt-superficie);
+  --padding-start: 12px;
+  --padding-end: 12px;
+  border-top: 1px solid var(--gt-borde);
+}
+
+.acciones-seleccion {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 6px 0;
+}
+
+.acciones-seleccion ion-button {
+  height: 46px;
+  margin: 0;
+}

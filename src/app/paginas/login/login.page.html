@@ -1,0 +1,76 @@
+<ion-content [fullscreen]="true" class="fondo-login">
+  <div class="brillo brillo-1" aria-hidden="true"></div>
+  <div class="brillo brillo-2" aria-hidden="true"></div>
+
+  <main class="contenedor">
+    <section class="tarjeta">
+      <header class="marca">
+        <app-logo [tamano]="56" />
+        <div>
+          <strong>Gestión Trabajo</strong>
+          <span>Central de solicitudes</span>
+        </div>
+      </header>
+
+      @if (!sb.configurado) {
+        <p class="aviso-error">{{ sb.errorInicio() }}</p>
+      } @else {
+        <div class="titulo">
+          <span class="etiqueta"><ion-icon name="lock-closed-outline" /> Área privada</span>
+          <h1>Bienvenido de nuevo</h1>
+          <p>Gestiona las solicitudes de todas tus webs desde un solo sitio.</p>
+        </div>
+
+        <form (ngSubmit)="entrar()" class="formulario">
+          <ion-input
+            label="Correo electrónico"
+            labelPlacement="floating"
+            fill="outline"
+            type="email"
+            inputmode="email"
+            autocomplete="username"
+            name="email"
+            [(ngModel)]="email"
+            [clearInput]="true"
+          >
+            <ion-icon slot="start" name="mail-outline" aria-hidden="true" />
+          </ion-input>
+
+          <ion-input
+            label="Contraseña"
+            labelPlacement="floating"
+            fill="outline"
+            type="password"
+            autocomplete="current-password"
+            name="contrasena"
+            [(ngModel)]="contrasena"
+          >
+            <ion-icon slot="start" name="lock-closed-outline" aria-hidden="true" />
+          </ion-input>
+
+          @if (error() || sb.errorInicio()) {
+            <p class="aviso-error" role="alert">
+              <ion-icon name="alert-circle" />
+              {{ error() || sb.errorInicio() }}
+            </p>
+          }
+
+          <ion-button type="submit" expand="block" size="large" [disabled]="enviando()">
+            @if (enviando()) {
+              <ion-spinner name="crescent" />
+              Entrando…
+            } @else {
+              Iniciar sesión
+              <ion-icon slot="end" name="arrow-forward" />
+            }
+          </ion-button>
+        </form>
+
+        <footer class="pie">
+          <span class="punto-vivo"></span>
+          Conexión cifrada · Acceso protegido
+        </footer>
+      }
+    </section>
+  </main>
+</ion-content>

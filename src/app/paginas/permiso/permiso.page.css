@@ -1,0 +1,133 @@
+.fondo {
+  --background:
+    radial-gradient(700px 400px at 50% -10%, color-mix(in srgb, var(--ion-color-primary) 22%, transparent), transparent 70%),
+    var(--gt-fondo);
+}
+
+.contenedor {
+  display: flex;
+  flex-direction: column;
+  max-width: 440px;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: calc(40px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
+  text-align: center;
+  animation: gt-aparecer 0.5s var(--gt-suave);
+}
+
+.ilustracion {
+  position: relative;
+  align-self: center;
+  margin-bottom: 26px;
+}
+
+.campana {
+  position: absolute;
+  right: -14px;
+  top: -10px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  font-size: 22px;
+  color: #fff;
+  background: var(--gt-rojo);
+  border: 3px solid var(--gt-fondo);
+  border-radius: 50%;
+  animation: balanceo 2.6s ease-in-out infinite;
+}
+
+@keyframes balanceo {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0);
+  }
+  70% {
+    transform: rotate(14deg);
+  }
+  80% {
+    transform: rotate(-12deg);
+  }
+  90% {
+    transform: rotate(6deg);
+  }
+}
+
+h1 {
+  margin: 0 0 10px;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.sub {
+  margin: 0 0 22px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--gt-tenue);
+}
+
+.ejemplos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.ejemplos li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--gt-superficie);
+  border: 1px solid var(--gt-borde);
+  border-left: 4px solid var(--web);
+  border-radius: 16px;
+  box-shadow: var(--gt-sombra-sm);
+  animation: gt-aparecer 0.5s var(--gt-suave) both;
+  animation-delay: var(--retraso);
+}
+
+.emoji {
+  font-size: 24px;
+}
+
+.ejemplos div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ejemplos strong {
+  font-size: 13.5px;
+  font-weight: 800;
+}
+
+.ejemplos span {
+  font-size: 13px;
+  color: var(--gt-texto-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nota {
+  margin: auto 0 16px;
+  font-size: 13px;
+  color: var(--gt-tenue);
+}
+
+ion-button {
+  margin: 0 0 6px;
+}
+
+ion-button[size='large'] {
+  height: 54px;
+  --border-radius: 16px;
+  font-size: 16px;
+}

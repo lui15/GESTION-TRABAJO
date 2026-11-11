@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icono de notificaciones: monograma "GT" + tres puntos, blanco sobre transparente.
+     Mismo dibujo que assets/notificacion.svg (Android lo tiñe con el color de cada web). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+    <path
+        android:pathData="M455.8,329.4A172,172 0,1 0,496 440H356"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="104"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M620,268H860M740,268V612"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="104"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M334,784a54,54 0,1 0,108 0a54,54 0,1 0,-108 0zM458,784a54,54 0,1 0,108 0a54,54 0,1 0,-108 0zM582,784a54,54 0,1 0,108 0a54,54 0,1 0,-108 0z" />
+</vector>

@@ -1,0 +1,185 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title><span class="titulo-grande">Ajustes</span></ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="ancho">
+    <!-- CUENTA -->
+    <section class="cuenta">
+      <div class="avatar">{{ iniciales() }}</div>
+      <div class="cuenta-texto">
+        <strong>Administrador</strong>
+        <span>{{ email() }}</span>
+      </div>
+    </section>
+
+    <!-- APARIENCIA -->
+    <ion-list [inset]="true" class="grupo">
+      <ion-list-header><ion-label>Apariencia</ion-label></ion-list-header>
+
+      <ion-item>
+        <ion-icon slot="start" [name]="tema.oscuro() ? 'moon-outline' : 'sunny-outline'" />
+        <ion-toggle
+          [checked]="tema.oscuro()"
+          (ionChange)="tema.setOscuro($event.detail.checked)"
+          justify="space-between"
+        >
+          Modo oscuro
+        </ion-toggle>
+      </ion-item>
+
+      <ion-item>
+        <ion-icon slot="start" name="phone-portrait-outline" />
+        <ion-toggle
+          [checked]="tema.modo() === 'auto'"
+          (ionChange)="tema.setModo($event.detail.checked ? 'auto' : tema.oscuro() ? 'dark' : 'light')"
+          justify="space-between"
+        >
+          <ion-label>
+            Automático
+            <p>Seguir el modo del teléfono</p>
+          </ion-label>
+        </ion-toggle>
+      </ion-item>
+
+      <ion-item lines="none" class="item-colores">
+        <ion-icon slot="start" name="color-palette-outline" />
+        <ion-label>
+          Color principal
+          <div class="colores" role="radiogroup" aria-label="Color principal">
+            @for (c of colores; track c.id) {
+              <button
+                type="button"
+                class="muestra"
+                role="radio"
+                [attr.aria-checked]="tema.color() === c.id"
+                [attr.aria-label]="c.nombre"
+                [title]="c.nombre"
+                [class.activa]="tema.color() === c.id"
+                [style.--muestra]="tema.oscuro() ? c.oscuro : c.claro"
+                (click)="tema.setColor(c.id)"
+              >
+                @if (tema.color() === c.id) {
+                  <ion-icon name="checkmark-circle" />
+                }
+              </button>
+            }
+          </div>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+    <!-- NOTIFICACIONES -->
+    <ion-list [inset]="true" class="grupo">
+      <ion-list-header><ion-label>Notificaciones</ion-label></ion-list-header>
+
+      <div class="estado-permiso" [class.ok]="estado().tipo === 'ok'" [class.mal]="estado().tipo === 'mal'">
+        <ion-icon
+          [name]="estado().tipo === 'ok' ? 'checkmark-circle' : estado().tipo === 'mal' ? 'notifications-off-outline' : 'information-circle-outline'"
+        />
+        <span>{{ estado().texto }}</span>
+      </div>
+
+      @if (noti.esNativo && !noti.activas() && noti.firebaseConfigurado() && noti.permiso() !== 'denied') {
+        <div class="botones-prueba">
+          <ion-button expand="block" (click)="activar()" [disabled]="activando()">
+            @if (activando()) {
+              <ion-spinner name="crescent" />
+            } @else {
+              <ion-icon slot="start" name="notifications-outline" />
+              Activar notificaciones
+            }
+          </ion-button>
+        </div>
+      }
+
+      <ion-item lines="none">
+        <ion-label class="ion-text-wrap">
+          <p>{{ noti.esNativo ? 'Recibir avisos de:' : 'Avisar con sonido de:' }}</p>
+        </ion-label>
+      </ion-item>
+
+      @for (web of canales; track web.canal) {
+        <ion-item [style.--web]="tema.oscuro() ? web.colorOscuro : web.color">
+          <span slot="start" class="punto-web" aria-hidden="true">{{ web.emoji }}</span>
+          <ion-toggle
+            [checked]="noti.websActivas().includes(web.canal)"
+            (ionChange)="cambiarWeb(web.canal, $event.detail.checked)"
+            justify="space-between"
+          >
+            {{ web.nombre }}
+          </ion-toggle>
+        </ion-item>
+      }
+
+      <ion-item lines="none">
+        <ion-icon slot="start" name="paper-plane-outline" />
+        <ion-select
+          label="Web de la prueba"
+          interface="popover"
+          [value]="webPrueba()"
+          (ionChange)="webPrueba.set($event.detail.value)"
+        >
+          @for (web of canales; track web.canal) {
+            <ion-select-option [value]="web.source">{{ web.emoji }} {{ web.nombre }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <div class="botones-prueba">
+        <ion-button expand="block" fill="outline" (click)="enviarPrueba()" [disabled]="noti.enviandoPrueba()">
+          @if (noti.enviandoPrueba()) {
+            <ion-spinner name="crescent" />
+          } @else {
+            <ion-icon slot="start" name="paper-plane-outline" />
+            Enviar notificación de prueba
+          }
+        </ion-button>
+        @if (noti.esNativo) {
+          <ion-button expand="block" fill="clear" (click)="avisoLocal()">
+            <ion-icon slot="start" name="phone-portrait-outline" />
+            Probar aviso local (sin Firebase)
+          </ion-button>
+        }
+      </div>
+    </ion-list>
+
+    <!-- SEGURIDAD (solo en la app del móvil) -->
+    @if (huella.esNativo) {
+      <ion-list [inset]="true" class="grupo">
+        <ion-list-header><ion-label>Seguridad</ion-label></ion-list-header>
+
+        <ion-item lines="none">
+          <ion-icon slot="start" name="finger-print-outline" />
+          <ion-toggle
+            [checked]="huella.activa()"
+            [disabled]="cambiandoHuella()"
+            (ionChange)="cambiarHuella($event)"
+            justify="space-between"
+          >
+            <ion-label class="ion-text-wrap">
+              Entrar con huella
+              <p>Pide tu huella al abrir la app o al volver a ella tras 1 minuto.</p>
+            </ion-label>
+          </ion-toggle>
+        </ion-item>
+      </ion-list>
+    }
+
+    <!-- SESIÓN -->
+    <ion-list [inset]="true" class="grupo">
+      <ion-item button [detail]="false" (click)="salir()" class="item-salir">
+        <ion-icon slot="start" name="log-out-outline" color="danger" />
+        <ion-label color="danger">Cerrar sesión</ion-label>
+      </ion-item>
+    </ion-list>
+
+    <footer class="acerca">
+      <app-logo [tamano]="40" />
+      <strong>Gestión Trabajo</strong>
+      <ion-note>Central de solicitudes · Panel privado</ion-note>
+    </footer>
+  </div>
+</ion-content>
