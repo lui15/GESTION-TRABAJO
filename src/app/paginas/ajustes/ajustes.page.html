@@ -1,0 +1,89 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title><span class="titulo-grande">Ajustes</span></ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="ancho">
+    <!-- CUENTA -->
+    <section class="cuenta">
+      <div class="avatar">{{ iniciales() }}</div>
+      <div class="cuenta-texto">
+        <strong>Administrador</strong>
+        <span>{{ email() }}</span>
+      </div>
+    </section>
+
+    <!-- APARIENCIA -->
+    <ion-list [inset]="true" class="grupo">
+      <ion-list-header><ion-label>Apariencia</ion-label></ion-list-header>
+
+      <ion-item>
+        <ion-icon slot="start" [name]="tema.oscuro() ? 'moon-outline' : 'sunny-outline'" />
+        <ion-toggle
+          [checked]="tema.oscuro()"
+          (ionChange)="tema.setOscuro($event.detail.checked)"
+          justify="space-between"
+        >
+          Modo oscuro
+        </ion-toggle>
+      </ion-item>
+
+      <ion-item>
+        <ion-icon slot="start" name="phone-portrait-outline" />
+        <ion-toggle
+          [checked]="tema.modo() === 'auto'"
+          (ionChange)="tema.setModo($event.detail.checked ? 'auto' : tema.oscuro() ? 'dark' : 'light')"
+          justify="space-between"
+        >
+          <ion-label>
+            Automático
+            <p>Seguir el modo del teléfono</p>
+          </ion-label>
+        </ion-toggle>
+      </ion-item>
+
+      <ion-item lines="none" class="item-colores">
+        <ion-icon slot="start" name="color-palette-outline" />
+        <ion-label>
+          Color principal
+          <div class="colores" role="radiogroup" aria-label="Color principal">
+            @for (c of colores; track c.id) {
+              <button
+                type="button"
+                class="muestra"
+                role="radio"
+                [attr.aria-checked]="tema.color() === c.id"
+                [attr.aria-label]="c.nombre"
+                [title]="c.nombre"
+                [class.activa]="tema.color() === c.id"
+                [style.--muestra]="tema.oscuro() ? c.oscuro : c.claro"
+                (click)="tema.setColor(c.id)"
+              >
+                @if (tema.color() === c.id) {
+                  <ion-icon name="checkmark-circle" />
+                }
+              </button>
+            }
+          </div>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+
+    <!-- SESIÓN -->
+    <ion-list [inset]="true" class="grupo">
+      <ion-item button [detail]="false" (click)="salir()" class="item-salir">
+        <ion-icon slot="start" name="log-out-outline" color="danger" />
+        <ion-label color="danger">Cerrar sesión</ion-label>
+      </ion-item>
+    </ion-list>
+
+    <footer class="acerca">
+      <app-logo [tamano]="40" />
+      <strong>Gestión Trabajo</strong>
+      <ion-note>Central de solicitudes · Panel privado</ion-note>
+    </footer>
+  </div>
+</ion-content>

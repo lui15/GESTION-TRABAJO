@@ -9,7 +9,8 @@
     ]
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "supabase/functions/_shared/**/*.ts"
   ],
   "exclude": [
     "src/**/*.spec.ts"

@@ -1,0 +1,254 @@
+<ion-header class="cabecera" [translucent]="true">
+  <ion-toolbar>
+    @if (seleccionando()) {
+      <ion-title>{{ seleccion().size }} seleccionadas</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="alternarTodas()">
+          {{ todasSeleccionadas() ? 'Ninguna' : 'Todas' }}
+        </ion-button>
+        <ion-button (click)="alternarModoSeleccion()" aria-label="Cancelar selección">
+          <ion-icon slot="icon-only" name="close" />
+        </ion-button>
+      </ion-buttons>
+    } @else {
+      <ion-title>
+        <span class="titulo-grande">{{ titulo() }}</span>
+      </ion-title>
+      <ion-buttons slot="end">
+        <ion-select
+          class="selector-orden"
+          interface="popover"
+          [value]="orden()"
+          (ionChange)="setOrden($any($event.detail.value))"
+          aria-label="Ordenar"
+          toggleIcon="swap-vertical-outline"
+          justify="end"
+        >
+          <ion-select-option value="newest">Más recientes</ion-select-option>
+          <ion-select-option value="oldest">Más antiguas</ion-select-option>
+          <ion-select-option value="name">Por nombre (A-Z)</ion-select-option>
+        </ion-select>
+        <ion-button
+          (click)="alternarModoSeleccion()"
+          [disabled]="filtradas().length === 0"
+          aria-label="Seleccionar varias"
+        >
+          <ion-icon slot="icon-only" name="checkbox-outline" />
+        </ion-button>
+        <ion-button
+          class="solo-escritorio"
+          (click)="datos.cargar()"
+          [disabled]="datos.cargando()"
+          aria-label="Actualizar"
+        >
+          <ion-icon slot="icon-only" name="refresh-outline" />
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+
+  <ion-toolbar class="barra-filtros">
+    <ion-searchbar
+      placeholder="Buscar cliente, teléfono o servicio"
+      [value]="busqueda()"
+      (ionInput)="busqueda.set($event.detail.value ?? '')"
+      [debounce]="150"
+      inputmode="search"
+      showClearButton="focus"
+    />
+
+    <div class="chips" role="group" aria-label="Filtrar por web">
+      <button
+        type="button"
+        class="chip"
+        [class.activo]="web() === 'all'"
+        (click)="web.set('all')"
+      >
+        Todas
+        <span class="cuenta">{{
+          filtro() === 'pending' ? datos.pendientes() : filtro() === 'reviewed' ? datos.revisadas() : datos.total()
+        }}</span>
+      </button>
+
+      @for (chip of chips(); track chip.source) {
+        <button
+          type="button"
+          class="chip"
+          [class.activo]="web() === chip.source"
+          [style.--web]="chip.color"
+          (click)="setWeb(chip.source)"
+        >
+          <span class="punto" aria-hidden="true"></span>
+          {{ chip.nombre }}
+          <span class="cuenta">{{ chip.total }}</span>
+        </button>
+      }
+    </div>
+
+    <ion-segment
+      [value]="filtro()"
+      (ionChange)="setFiltro($event.detail.value)"
+      class="segmento"
+    >
+      <ion-segment-button value="pending">
+        <ion-label>Nuevas <b>{{ datos.pendientes() }}</b></ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="reviewed">
+        <ion-label>Revisadas <b>{{ datos.revisadas() }}</b></ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="all">
+        <ion-label>Todas <b>{{ datos.total() }}</b></ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="contenido">
+  <ion-refresher slot="fixed" (ionRefresh)="recargar($event)">
+    <ion-refresher-content />
+  </ion-refresher>
+
+  <div class="ancho">
+    @if (datos.error()) {
+      <div class="aviso-error" role="alert">
+        <ion-icon name="alert-circle" />
+        <span>{{ datos.error() }}</span>
+        <ion-button fill="clear" size="small" (click)="datos.cargar()">Reintentar</ion-button>
+      </div>
+    }
+
+    @if (datos.cargando() && !datos.cargadoUnaVez()) {
+      <!-- Esqueletos de carga -->
+      <div class="lista">
+        @for (e of esqueletos; track e) {
+          <div class="esqueleto">
+            <ion-skeleton-text [animated]="true" class="esq-avatar" />
+            <div class="esq-lineas">
+              <ion-skeleton-text [animated]="true" style="width: 45%" />
+              <ion-skeleton-text [animated]="true" style="width: 80%" />
+              <ion-skeleton-text [animated]="true" style="width: 30%" />
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (filtradas().length === 0) {
+      <!-- Estado vacío -->
+      <div class="vacio">
+        <div class="vacio-ilustracion" aria-hidden="true">
+          <ion-icon [name]="busqueda() ? 'search-outline' : 'sparkles-outline'" />
+        </div>
+        <h2>{{ busqueda() ? 'Sin resultados' : filtro() === 'pending' ? 'Todo al día' : 'Nada por aquí' }}</h2>
+        <p>
+          {{
+            busqueda()
+              ? 'No encontramos nada con esa búsqueda.'
+              : filtro() === 'pending'
+                ? 'Cuando alguien envíe un formulario desde tus webs, aparecerá aquí al momento.'
+                : 'No hay solicitudes en esta sección.'
+          }}
+        </p>
+        @if (busqueda() || web() !== 'all') {
+          <ion-button fill="outline" (click)="busqueda.set(''); web.set('all')">
+            Quitar filtros
+          </ion-button>
+        }
+      </div>
+    } @else {
+      @if (!seleccionando()) {
+        <p class="pista">Desliza → para revisar · ← para WhatsApp o llamar</p>
+      }
+
+      @for (grupo of grupos(); track grupo.etiqueta) {
+        <section class="grupo">
+          <h3 class="grupo-titulo">
+            {{ grupo.etiqueta }}
+            <span>{{ grupo.items.length }}</span>
+          </h3>
+
+          <ion-list class="lista" lines="none">
+            @for (s of grupo.items; track s.id; let i = $index) {
+              <ion-item-sliding #deslizable [disabled]="seleccionando()" class="fila" [style.--retraso]="(i < 10 ? i : 10) * 35 + 'ms'">
+                <!-- Deslizar a la derecha: revisar -->
+                <ion-item-options side="start" (ionSwipe)="revisar(s, deslizable)">
+                  <ion-item-option
+                    [color]="s.reviewed_at ? 'medium' : 'success'"
+                    expandable
+                    (click)="revisar(s, deslizable)"
+                  >
+                    <ion-icon slot="top" [name]="s.reviewed_at ? 'arrow-undo-outline' : 'checkmark-done-outline'" />
+                    {{ s.reviewed_at ? 'Pendiente' : 'Revisada' }}
+                  </ion-item-option>
+                </ion-item-options>
+
+                <ion-item
+                  button
+                  [detail]="false"
+                  (click)="abrir(s)"
+                  class="item-tarjeta"
+                >
+                  <app-tarjeta-solicitud
+                    [solicitud]="s"
+                    [ahora]="ahora()"
+                    [seleccionando]="seleccionando()"
+                    [seleccionada]="seleccion().has(s.id)"
+                  />
+                </ion-item>
+
+                <!-- Deslizar a la izquierda: WhatsApp o llamar -->
+                @if (s.phone) {
+                  <ion-item-options side="end">
+                    <ion-item-option
+                      class="op-whatsapp"
+                      [href]="whatsapp(s)"
+                      target="_blank"
+                      rel="noopener"
+                      (click)="cerrar(deslizable)"
+                    >
+                      <ion-icon slot="top" name="logo-whatsapp" />
+                      WhatsApp
+                    </ion-item-option>
+                    <ion-item-option
+                      color="primary"
+                      [href]="llamar(s)"
+                      (click)="cerrar(deslizable)"
+                    >
+                      <ion-icon slot="top" name="call" />
+                      Llamar
+                    </ion-item-option>
+                  </ion-item-options>
+                }
+              </ion-item-sliding>
+            }
+          </ion-list>
+        </section>
+      }
+    }
+  </div>
+</ion-content>
+
+@if (seleccionando()) {
+  <ion-footer class="pie-seleccion">
+    <ion-toolbar>
+      <div class="acciones-seleccion">
+        <ion-button
+          fill="solid"
+          color="success"
+          [disabled]="seleccion().size === 0"
+          (click)="revisarSeleccionadas()"
+        >
+          <ion-icon slot="start" name="checkmark-done-outline" />
+          Revisadas
+        </ion-button>
+        <ion-button
+          fill="solid"
+          color="danger"
+          [disabled]="seleccion().size === 0"
+          (click)="eliminarSeleccionadas()"
+        >
+          <ion-icon slot="start" name="trash-outline" />
+          Eliminar
+        </ion-button>
+      </div>
+    </ion-toolbar>
+  </ion-footer>
+}
