@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import {
   IonButton,
   IonContent,
@@ -9,12 +9,17 @@ import {
   IonList,
   IonListHeader,
   IonNote,
+  IonSelect,
+  IonSelectOption,
+  IonSpinner,
   IonTitle,
   IonToggle,
   IonToolbar,
 } from '@ionic/angular';
 
 import { LogoComponent } from '../../componentes/logo.component';
+import { CANALES } from '../../datos/webs';
+import { NotificacionesService } from '../../servicios/notificaciones.service';
 import { AvisosService } from '../../servicios/avisos.service';
 import { SupabaseService } from '../../servicios/supabase.service';
 import { COLORES, TemaService } from '../../servicios/tema.service';
@@ -32,6 +37,9 @@ import { iniciales } from '../../utilidades/formato';
     IonItem,
     IonLabel,
     IonNote,
+    IonSelect,
+    IonSelectOption,
+    IonSpinner,
     IonToggle,
     IonIcon,
     IonButton,
@@ -46,7 +54,44 @@ export class AjustesPage {
   protected readonly tema = inject(TemaService);
   protected readonly avisos = inject(AvisosService);
 
+  protected readonly noti = inject(NotificacionesService);
+
   protected readonly colores = COLORES;
+  protected readonly canales = CANALES;
+  protected readonly webPrueba = signal('mudanzas360');
+  protected readonly activando = signal(false);
+
+  /** Texto del estado de las notificaciones en este dispositivo. */
+  protected readonly estado = computed<{ tipo: 'ok' | 'mal' | 'info'; texto: string }>(() => {
+    if (!this.noti.esNativo) {
+      return {
+        tipo: 'info',
+        texto:
+          'En la web te avisamos con un sonido mientras el panel esté abierto. ' +
+          'Las notificaciones push llegan a la app Android.',
+      };
+    }
+
+    if (this.noti.firebaseConfigurado() === false) {
+      return {
+        tipo: 'mal',
+        texto: 'Esta versión de la app se compiló sin Firebase (google-services.json). Ver la guía.',
+      };
+    }
+
+    if (this.noti.permiso() === 'denied') {
+      return {
+        tipo: 'mal',
+        texto: 'Las notificaciones están bloqueadas. Actívalas en Ajustes de Android → Apps → Gestión Trabajo.',
+      };
+    }
+
+    if (this.noti.activas()) {
+      return { tipo: 'ok', texto: 'Activadas. Este móvil recibirá un aviso por cada solicitud nueva.' };
+    }
+
+    return { tipo: 'info', texto: 'Aún no están activadas en este móvil.' };
+  });
 
   protected readonly email = computed(() => this.sb.usuario()?.email ?? '');
   protected readonly iniciales = computed(() => iniciales(this.email()));
@@ -71,8 +116,48 @@ export class AjustesPage {
     }
   }
 
-  /** Se amplía en la fase de notificaciones (borrar el token del dispositivo). */
   protected async antesDeSalir(): Promise<void> {
-    return;
+    await this.noti.antesDeCerrarSesion();
+  }
+
+  protected async activar(): Promise<void> {
+    this.activando.set(true);
+
+    try {
+      const ok = await this.noti.activar();
+
+      if (ok) {
+        await this.avisos.exito('Notificaciones activadas.');
+      } else if (this.noti.permiso() === 'denied') {
+        await this.avisos.error('Permiso denegado. Puedes activarlo en los ajustes de Android.');
+      }
+    } finally {
+      this.activando.set(false);
+    }
+  }
+
+  protected async cambiarWeb(canal: string, activa: boolean): Promise<void> {
+    try {
+      await this.noti.setWebActiva(canal, activa);
+    } catch (error) {
+      await this.avisos.error((error as Error).message);
+    }
+  }
+
+  protected async enviarPrueba(): Promise<void> {
+    try {
+      await this.avisos.exito(await this.noti.enviarPrueba(this.webPrueba()));
+    } catch (error) {
+      await this.avisos.error((error as Error).message);
+    }
+  }
+
+  protected async avisoLocal(): Promise<void> {
+    try {
+      await this.noti.avisoLocalDePrueba(this.webPrueba());
+      await this.avisos.exito('Aviso local en 3 segundos. Bloquea el móvil o sal de la app para verlo.');
+    } catch (error) {
+      await this.avisos.error((error as Error).message);
+    }
   }
 }

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { IonButton, IonContent, IonIcon, IonInput, IonSpinner } from '@ionic/angular';
 
 import { LogoComponent } from '../../componentes/logo.component';
+import { NotificacionesService } from '../../servicios/notificaciones.service';
 import { SupabaseService } from '../../servicios/supabase.service';
 
 @Component({
@@ -16,6 +17,7 @@ import { SupabaseService } from '../../servicios/supabase.service';
 export class LoginPage {
   protected readonly sb = inject(SupabaseService);
   private readonly router = inject(Router);
+  private readonly noti = inject(NotificacionesService);
 
   protected email = '';
   protected contrasena = '';
@@ -44,8 +46,8 @@ export class LoginPage {
     await this.router.navigateByUrl(this.destinoTrasEntrar(), { replaceUrl: true });
   }
 
-  /** Se sobrescribe en la fase de notificaciones (pantalla previa al permiso). */
+  /** En Android, la primera vez se explica para qué sirven las notificaciones. */
   protected destinoTrasEntrar(): string {
-    return '/solicitudes';
+    return this.noti.necesitaPantallaPrevia() ? '/permiso-notificaciones' : '/solicitudes';
   }
 }

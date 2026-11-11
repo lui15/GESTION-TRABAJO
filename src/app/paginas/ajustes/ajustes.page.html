@@ -71,6 +71,80 @@
       </ion-item>
     </ion-list>
 
+    <!-- NOTIFICACIONES -->
+    <ion-list [inset]="true" class="grupo">
+      <ion-list-header><ion-label>Notificaciones</ion-label></ion-list-header>
+
+      <div class="estado-permiso" [class.ok]="estado().tipo === 'ok'" [class.mal]="estado().tipo === 'mal'">
+        <ion-icon
+          [name]="estado().tipo === 'ok' ? 'checkmark-circle' : estado().tipo === 'mal' ? 'notifications-off-outline' : 'information-circle-outline'"
+        />
+        <span>{{ estado().texto }}</span>
+      </div>
+
+      @if (noti.esNativo && !noti.activas() && noti.firebaseConfigurado() && noti.permiso() !== 'denied') {
+        <div class="botones-prueba">
+          <ion-button expand="block" (click)="activar()" [disabled]="activando()">
+            @if (activando()) {
+              <ion-spinner name="crescent" />
+            } @else {
+              <ion-icon slot="start" name="notifications-outline" />
+              Activar notificaciones
+            }
+          </ion-button>
+        </div>
+      }
+
+      <ion-item lines="none">
+        <ion-label class="ion-text-wrap">
+          <p>{{ noti.esNativo ? 'Recibir avisos de:' : 'Avisar con sonido de:' }}</p>
+        </ion-label>
+      </ion-item>
+
+      @for (web of canales; track web.canal) {
+        <ion-item [style.--web]="tema.oscuro() ? web.colorOscuro : web.color">
+          <span slot="start" class="punto-web" aria-hidden="true">{{ web.emoji }}</span>
+          <ion-toggle
+            [checked]="noti.websActivas().includes(web.canal)"
+            (ionChange)="cambiarWeb(web.canal, $event.detail.checked)"
+            justify="space-between"
+          >
+            {{ web.nombre }}
+          </ion-toggle>
+        </ion-item>
+      }
+
+      <ion-item lines="none">
+        <ion-icon slot="start" name="paper-plane-outline" />
+        <ion-select
+          label="Web de la prueba"
+          interface="popover"
+          [value]="webPrueba()"
+          (ionChange)="webPrueba.set($event.detail.value)"
+        >
+          @for (web of canales; track web.canal) {
+            <ion-select-option [value]="web.source">{{ web.emoji }} {{ web.nombre }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <div class="botones-prueba">
+        <ion-button expand="block" fill="outline" (click)="enviarPrueba()" [disabled]="noti.enviandoPrueba()">
+          @if (noti.enviandoPrueba()) {
+            <ion-spinner name="crescent" />
+          } @else {
+            <ion-icon slot="start" name="paper-plane-outline" />
+            Enviar notificación de prueba
+          }
+        </ion-button>
+        @if (noti.esNativo) {
+          <ion-button expand="block" fill="clear" (click)="avisoLocal()">
+            <ion-icon slot="start" name="phone-portrait-outline" />
+            Probar aviso local (sin Firebase)
+          </ion-button>
+        }
+      </div>
+    </ion-list>
 
     <!-- SESIÓN -->
     <ion-list [inset]="true" class="grupo">

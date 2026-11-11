@@ -4,6 +4,7 @@ import { Capacitor } from '@capacitor/core';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { IonApp, IonRouterOutlet } from '@ionic/angular';
 
+import { NotificacionesService } from './servicios/notificaciones.service';
 import { SolicitudesService } from './servicios/solicitudes.service';
 import { SupabaseService } from './servicios/supabase.service';
 import { TemaService } from './servicios/tema.service';
@@ -29,6 +30,9 @@ export class App {
     // Arrancan con la app: tema guardado y lista en tiempo real.
     inject(TemaService);
     inject(SolicitudesService);
+
+    // Notificaciones: canales, permisos y escucha de avisos (solo en Android).
+    void inject(NotificacionesService).inicializar();
 
     // Al cerrar sesión (aquí o en otro dispositivo), volver al login.
     let habiaUsuario = false;

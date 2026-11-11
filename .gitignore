@@ -45,6 +45,7 @@ Thumbs.db
 # Secretos y archivos locales (nunca a git)
 .env
 .env.*
+!.env.example
 android/app/google-services.json
 supabase/.temp/
 supabase/functions/.env

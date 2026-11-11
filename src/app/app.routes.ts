@@ -9,6 +9,11 @@ export const routes: Routes = [
     loadComponent: () => import('./paginas/login/login.page').then((m) => m.LoginPage),
   },
   {
+    path: 'permiso-notificaciones',
+    canActivate: [conSesion],
+    loadComponent: () => import('./paginas/permiso/permiso.page').then((m) => m.PermisoPage),
+  },
+  {
     path: 'solicitud/:id',
     canActivate: [conSesion],
     loadComponent: () => import('./paginas/solicitud/solicitud.page').then((m) => m.SolicitudPage),
